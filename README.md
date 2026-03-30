@@ -2,6 +2,8 @@
 
 Biblioteca Java para construir interfaces gráficas desktop no estilo declarativo do Jetpack Compose, com backend JavaFX.
 
+[![](https://jitpack.io/v/FabioRodrigues0/bricks.svg)](https://jitpack.io/#FabioRodrigues0/bricks)
+
 ## Conceito
 
 Em vez de construir UIs com XML ou arrastando componentes, o Bricks usa uma API fluente em Java puro — semelhante ao Compose do Android, mas para aplicações desktop.
