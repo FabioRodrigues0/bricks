@@ -1,0 +1,1 @@
+- adicionar um tema default e forma de poder alterar, ou por css ou por como tem no kotlin
