@@ -3,8 +3,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet"></head>
     
-<p align="center" style="font-size: 72px; font-weight: bold; margin-bottom: 16px; font-family: 'Space Grotesk', sans-serif;">
-    Bricks
+<p align="center">
+  <svg width="300" height="80" xmlns="http://www.w3.org/2000/svg">
+    <text x="50%" y="60" 
+          text-anchor="middle" 
+          font-family="Space Grotesk, sans-serif" 
+          font-size="64" 
+          font-weight="bold">Bricks</text>
+  </svg>
 </p>
 
 <p align="center">
