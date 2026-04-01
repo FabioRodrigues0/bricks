@@ -1,10 +1,5 @@
-<head>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet"></head>
-    
-<p align="center" style="font-size: 72px; font-weight: bold; margin-bottom: 16px; font-family: 'Space Grotesk', sans-serif;">
-    Bricks
+<p align="center">
+  <img src="assets/bricks-logo.svg" alt="Bricks" width="400">
 </p>
 
 <p align="center">
