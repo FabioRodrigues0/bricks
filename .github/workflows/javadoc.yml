@@ -23,8 +23,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Copiar dependências
+        run: mvn -B dependency:copy-dependencies --file pom.xml
+
       - name: Gerar Javadoc
-        run: mvn -B generate-sources javadoc:javadoc --file pom.xml
+        run: mvn -B javadoc:javadoc --file pom.xml
 
       - name: Publicar no GitHub Pages (branch gh-pages)
         uses: peaceiris/actions-gh-pages@v3
