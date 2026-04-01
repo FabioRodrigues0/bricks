@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/bricks-logo.svg" alt="Bricks" width="400">
+  <img src="assets/bricks-logo.svg" alt="Bricks" width="800">
 </p>
 
 <p align="center">
