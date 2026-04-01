@@ -58,6 +58,15 @@
                         <phase>generate-sources</phase>
                         <goals><goal>copy-dependencies</goal></goals>
                     </execution>
+                    <execution>
+                        <id>copy-javadoc-modules</id>
+                        <phase>generate-sources</phase>
+                        <goals><goal>copy-dependencies</goal></goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/javadoc-modules</outputDirectory>
+                            <includeArtifactIds>javafx-controls,javafx-graphics,javafx-base,ikonli-javafx,ikonli-core</includeArtifactIds>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -104,7 +113,7 @@
                     <detectLinks>false</detectLinks>
                     <additionalOptions>
                         <additionalOption>--module-path</additionalOption>
-                        <additionalOption>${project.build.directory}/dependency</additionalOption>
+                        <additionalOption>${project.build.directory}/javadoc-modules</additionalOption>
                         <additionalOption>--add-modules</additionalOption>
                         <additionalOption>javafx.controls,javafx.graphics,org.kordamp.ikonli.core,org.kordamp.ikonli.javafx</additionalOption>
                     </additionalOptions>
