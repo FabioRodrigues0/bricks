@@ -78,7 +78,7 @@ Depois, adicione a dependência do Bricks:
 
 ```kotlin
 dependencies {
-    implementation("com.github.fabiorodrigues0:bricks:0.3.0")
+    implementation("com.github.fabiorodrigues0:bricks:0.4.0")
 }
 ```
 
