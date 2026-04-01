@@ -91,6 +91,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.6.3</version>
                 <configuration>
+                    <release>17</release>
                     <show>public</show>
                     <windowtitle>Bricks ${project.version} — API</windowtitle>
                     <doctitle>Bricks ${project.version} — Documentação da API</doctitle>
@@ -99,10 +100,14 @@
                     <encoding>UTF-8</encoding>
                     <docencoding>UTF-8</docencoding>
                     <notimestamp>true</notimestamp>
-                    <additionalJOptions>
-                        <additionalJOption>--module-path</additionalJOption>
-                        <additionalJOption>${project.build.directory}/dependency</additionalJOption>
-                    </additionalJOptions>
+                    <detectJavaApiLink>false</detectJavaApiLink>
+                    <detectLinks>false</detectLinks>
+                    <additionalOptions>
+                        <additionalOption>--module-path</additionalOption>
+                        <additionalOption>${project.build.directory}/dependency</additionalOption>
+                        <additionalOption>--add-modules</additionalOption>
+                        <additionalOption>javafx.controls,javafx.graphics,org.kordamp.ikonli.core,org.kordamp.ikonli.javafx</additionalOption>
+                    </additionalOptions>
                     <links>
                         <link>https://docs.oracle.com/en/java/javase/17/docs/api/</link>
                     </links>

@@ -1,8 +1,21 @@
-# Bricks
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet"></head>
+    
+<p align="center" style="font-size: 32px; font-weight: bold; margin-bottom: 16px; font-family: 'Space Grotesk', sans-serif;">
+    Bricks
+</p>
+
+<p align="center">
+  <a href="https://jitpack.io/#FabioRodrigues0/bricks"><img src="https://jitpack.io/v/FabioRodrigues0/bricks.svg" alt="Latest Version"></a>
+  <a href="https://github.com/larastan/larastan/blob/master/LICENSE.md"><img src="https://poser.pugx.org/larastan/larastan/license.svg" alt="License"></a>
+</p>
+
+---
 
 Biblioteca Java para construir interfaces gráficas desktop no estilo declarativo do Jetpack Compose, com backend JavaFX.
 
-[![](https://jitpack.io/v/FabioRodrigues0/bricks.svg)](https://jitpack.io/#FabioRodrigues0/bricks)
 
 ## Conceito
 
