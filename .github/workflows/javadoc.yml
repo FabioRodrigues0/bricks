@@ -1,0 +1,69 @@
+name: Publicar Javadoc
+
+on:
+  push:
+    branches: ["master"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  javadoc:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Copiar dependências
+        run: mvn -B dependency:copy-dependencies --file pom.xml
+
+      - name: Gerar Javadoc
+        run: mvn -B javadoc:javadoc --file pom.xml
+
+      - name: Publicar no GitHub Pages (branch gh-pages)
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/site/apidocs
+          destination_dir: javadoc
+          commit_message: "docs: atualizar Javadoc"
+
+      - name: Atualizar página no GitHub Wiki
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git wiki
+
+          cat > wiki/Javadoc.md << 'WIKIEOF'
+          # Javadoc — Bricks API
+
+          Documentação gerada automaticamente a partir dos comentários do código fonte.
+
+          **→ [Abrir Javadoc completo](https://fabiorodrigues0.github.io/bricks/javadoc/index.html)**
+
+          ---
+
+          ## Pacotes
+
+          | Pacote | Conteúdo |
+          |--------|----------|
+          | [`fabiorodrigues.bricks.core`](https://fabiorodrigues0.github.io/bricks/javadoc/fabiorodrigues/bricks/core/package-summary.html) | `BricksApplication`, `State`, `DerivedState`, `StateList`, `Effect` |
+          | [`fabiorodrigues.bricks.components`](https://fabiorodrigues0.github.io/bricks/javadoc/fabiorodrigues/bricks/components/package-summary.html) | `Button`, `Text`, `Column`, `Row`, `TextField`, `LazyColumn`, … |
+          | [`fabiorodrigues.bricks.style`](https://fabiorodrigues0.github.io/bricks/javadoc/fabiorodrigues/bricks/style/package-summary.html) | `Modifier`, `BricksTheme`, `ThemeRegistry` |
+          | [`fabiorodrigues.bricks.data`](https://fabiorodrigues0.github.io/bricks/javadoc/fabiorodrigues/bricks/data/package-summary.html) | `DB`, `Query`, `QueryResult`, `ResultMapper`, configs de base de dados |
+          WIKIEOF
+
+          cd wiki
+          git add Javadoc.md
+          git diff --staged --quiet || git commit -m "docs: atualizar link Javadoc"
+          git push

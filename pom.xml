@@ -86,6 +86,36 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.6.3</version>
+                <configuration>
+                    <show>public</show>
+                    <windowtitle>Bricks ${project.version} — API</windowtitle>
+                    <doctitle>Bricks ${project.version} — Documentação da API</doctitle>
+                    <header><![CDATA[<strong>Bricks ${project.version}</strong>]]></header>
+                    <charset>UTF-8</charset>
+                    <encoding>UTF-8</encoding>
+                    <docencoding>UTF-8</docencoding>
+                    <notimestamp>true</notimestamp>
+                    <additionalJOptions>
+                        <additionalJOption>--module-path</additionalJOption>
+                        <additionalJOption>${project.build.directory}/dependency</additionalJOption>
+                    </additionalJOptions>
+                    <links>
+                        <link>https://docs.oracle.com/en/java/javase/17/docs/api/</link>
+                    </links>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
