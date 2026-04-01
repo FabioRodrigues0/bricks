@@ -23,17 +23,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Copiar dependências
-        run: mvn -B dependency:copy-dependencies --file pom.xml
-
-      - name: Gerar Javadoc
-        run: mvn -B javadoc:javadoc --file pom.xml
+      - name: Build e Gerar Javadoc
+        run: mvn -B package -DskipTests --file pom.xml
 
       - name: Publicar no GitHub Pages (branch gh-pages)
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/site/apidocs
+          publish_dir: ./target/apidocs
           destination_dir: javadoc
           commit_message: "docs: atualizar Javadoc"
 
