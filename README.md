@@ -5,12 +5,12 @@
 <p align="center">
   <a href="https://jitpack.io/#FabioRodrigues0/bricks"><img src="https://jitpack.io/v/FabioRodrigues0/bricks.svg" alt="Latest Version"></a>
   <a href="https://github.com/FabioRodrigues0/bricks/blob/master/LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"></a>
+  <a href="https://fabiorodrigues0.github.io/bricks/javadoc/"><img src="https://img.shields.io/badge/Javadoc-API-orange.svg" alt="Javadoc"></a>
 </p>
 
 ---
 
 Biblioteca Java para construir interfaces gráficas desktop no estilo declarativo do Jetpack Compose, com backend JavaFX.
-
 
 ## Conceito
 
@@ -55,12 +55,13 @@ Primeiro, adicione o repositório JitPack ao seu `pom.xml`:
 
 ```xml
 <repositories>
-		<repository>
-		    <id>jitpack.io</id>
-		    <url>https://jitpack.io</url>
-		</repository>
-	</repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
 ```
+
 Depois, adicione a dependência do Bricks:
 
 ```xml
@@ -75,13 +76,13 @@ Depois, adicione a dependência do Bricks:
 
 Primeiro, adicione o repositório JitPack ao seu `build.gradle`:
 
-
 ```kotlin
 repositories {
     mavenLocal()
     maven {'https://jitpack.io'}
 }
 ```
+
 Depois, adicione a dependência do Bricks:
 
 ```kotlin
@@ -143,14 +144,14 @@ private final DerivedState<List<String>> filtrados = derived(
 
 ### Layout
 
-| Componente | Descrição |
-|---|---|
-| `Column` | Filhos dispostos verticalmente |
-| `Row` | Filhos dispostos horizontalmente |
-| `Box` | Filhos empilhados (StackPane) |
-| `ScrollView` | Contentor com scroll |
-| `Spacer` | Espaço flexível entre elementos |
-| `Divider` | Linha separadora horizontal ou vertical |
+| Componente   | Descrição                               |
+| ------------ | --------------------------------------- |
+| `Column`     | Filhos dispostos verticalmente          |
+| `Row`        | Filhos dispostos horizontalmente        |
+| `Box`        | Filhos empilhados (StackPane)           |
+| `ScrollView` | Contentor com scroll                    |
+| `Spacer`     | Espaço flexível entre elementos         |
+| `Divider`    | Linha separadora horizontal ou vertical |
 
 ```java
 new Column()
@@ -169,14 +170,14 @@ new Column()
 
 ### Texto e entrada
 
-| Componente | Descrição |
-|---|---|
-| `Text` | Texto estático |
+| Componente  | Descrição                             |
+| ----------- | ------------------------------------- |
+| `Text`      | Texto estático                        |
 | `TextField` | Campo de texto (simples ou multiline) |
-| `Button` | Botão clicável |
-| `Checkbox` | Caixa de seleção |
-| `Dropdown` | Lista de seleção |
-| `Slider` | Controlo deslizante |
+| `Button`    | Botão clicável                        |
+| `Checkbox`  | Caixa de seleção                      |
+| `Dropdown`  | Lista de seleção                      |
+| `Slider`    | Controlo deslizante                   |
 
 ```java
 new TextField()
@@ -205,11 +206,11 @@ new Button("Guardar")
 
 ### Progresso e media
 
-| Componente | Descrição |
-|---|---|
+| Componente    | Descrição                             |
+| ------------- | ------------------------------------- |
 | `ProgressBar` | Barra de progresso (ou indeterminado) |
-| `Image` | Imagem a partir de ficheiro ou URL |
-| `Icon` | Ícone FontAwesome 5 |
+| `Image`       | Imagem a partir de ficheiro ou URL    |
+| `Icon`        | Ícone FontAwesome 5                   |
 
 ```java
 new ProgressBar().value(0.75)
@@ -264,13 +265,13 @@ new Column().modifier(cartao).children(...)
 
 ### Propriedades disponíveis
 
-| Categoria | Métodos |
-|---|---|
-| Dimensões | `width`, `height`, `size`, `fillMaxWidth`, `fillMaxHeight` |
-| Espaçamento | `padding`, `margin`, `gap` |
-| Layout | `alignment(Pos)` |
-| Texto | `fontSize`, `fontFamily`, `bold`, `italic`, `textColor` |
-| Visual | `background`, `border`, `borderRadius`, `opacity`, `visible` |
+| Categoria   | Métodos                                                      |
+| ----------- | ------------------------------------------------------------ |
+| Dimensões   | `width`, `height`, `size`, `fillMaxWidth`, `fillMaxHeight`   |
+| Espaçamento | `padding`, `margin`, `gap`                                   |
+| Layout      | `alignment(Pos)`                                             |
+| Texto       | `fontSize`, `fontFamily`, `bold`, `italic`, `textColor`      |
+| Visual      | `background`, `border`, `borderRadius`, `opacity`, `visible` |
 
 ---
 
