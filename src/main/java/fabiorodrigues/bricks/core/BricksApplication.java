@@ -131,6 +131,28 @@ public abstract class BricksApplication extends Application {
     }
 
     /**
+     * Cria um {@link StateList} reativo ligado a esta aplicacao.
+     * Quando a lista e mutada, a aplicacao faz re-render automaticamente.
+     *
+     * <pre>{@code
+     * private final StateList<Note> notas = stateList(seedNotes());
+     *
+     * // mutacao dispara re-render
+     * notas.add(novaNota);
+     * notas.remove(nota);
+     * }</pre>
+     *
+     * @param initial lista com os valores iniciais
+     * @param <T> o tipo dos elementos
+     * @return o StateList criado
+     */
+    protected <T> StateList<T> stateList(List<T> initial) {
+        StateList<T> sl = new StateList<>(initial);
+        sl.addListener(() -> Platform.runLater(this::rerender));
+        return sl;
+    }
+
+    /**
      * Cria um {@link DerivedState} ligado a esta aplicacao.
      * O valor e calculado automaticamente a partir das dependencias indicadas.
      * Quando qualquer dependencia muda, o valor e recalculado no proximo re-render.
@@ -151,6 +173,25 @@ public abstract class BricksApplication extends Application {
         DerivedState<T> ds = new DerivedState<>(supplier, dependencies);
         ds.setOnChanged(() -> Platform.runLater(this::rerender));
         return ds;
+    }
+
+    /**
+     * Cria um {@link Effect} que executa uma acao quando qualquer dependencia muda.
+     * Nao dispara re-render — e independente do ciclo de render da aplicacao.
+     * A acao e executada imediatamente uma vez no arranque.
+     *
+     * <pre>{@code
+     * private final Effect autoSave = effect(() -> {
+     *     Storage.save(notas.get());
+     * }, notas);
+     * }</pre>
+     *
+     * @param action       {@code Runnable} — a acao a executar
+     * @param dependencies {@code State<?>...} — os estados a observar
+     * @return o effect criado
+     */
+    protected Effect effect(Runnable action, State<?>... dependencies) {
+        return new Effect(action, dependencies);
     }
 
     private void applyThemeToScene(Scene s) {
