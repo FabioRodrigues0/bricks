@@ -9,7 +9,7 @@
 
 <p align="center">
   <a href="https://jitpack.io/#FabioRodrigues0/bricks"><img src="https://jitpack.io/v/FabioRodrigues0/bricks.svg" alt="Latest Version"></a>
-  <a href="https://github.com/larastan/larastan/blob/master/LICENSE.md"><img src="https://poser.pugx.org/larastan/larastan/license.svg" alt="License"></a>
+  <a href="https://github.com/FabioRodrigues0/bricks/blob/master/LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"></a>
 </p>
 
 ---
