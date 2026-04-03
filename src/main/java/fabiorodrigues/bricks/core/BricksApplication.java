@@ -2,7 +2,6 @@ package fabiorodrigues.bricks.core;
 
 import fabiorodrigues.bricks.style.BricksTheme;
 import fabiorodrigues.bricks.style.ThemeRegistry;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -50,6 +49,8 @@ public abstract class BricksApplication extends Application {
     private final List<State<?>> states = new ArrayList<>();
     private BricksTheme theme = BricksTheme.material();
     private Scene scene;
+    private double width = 800;
+    private double height = 600;
 
     /**
      * Define a arvore de componentes da aplicacao. Chamado a cada re-render.
@@ -65,6 +66,17 @@ public abstract class BricksApplication extends Application {
      */
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    /**
+     * Define o tamanho da janela.
+     *
+     * @param width {@code double} — a largura da janela
+     * @param height {@code double} - a altura da janela
+     */
+    public void setSize(double width, double height) {
+        this.width = width;
+        this.height = height;
     }
 
     /**
@@ -101,7 +113,7 @@ public abstract class BricksApplication extends Application {
         container = new StackPane();
         rerender();
 
-        scene = new Scene(container, 400, 600);
+        scene = new Scene(container, width, height);
         applyThemeToScene(scene);
         stage.setScene(scene);
         stage.setTitle(title);

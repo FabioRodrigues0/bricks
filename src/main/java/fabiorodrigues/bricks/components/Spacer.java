@@ -60,9 +60,8 @@ public class Spacer implements Component {
 
         if (fixedSize >= 0) {
             region.setMinWidth(fixedSize);
-            region.setMinHeight(fixedSize);
+            region.setPrefWidth(fixedSize);
             region.setMaxWidth(fixedSize);
-            region.setMaxHeight(fixedSize);
         } else {
             HBox.setHgrow(region, Priority.ALWAYS);
             VBox.setVgrow(region, Priority.ALWAYS);

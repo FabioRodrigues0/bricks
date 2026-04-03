@@ -3,13 +3,14 @@ package fabiorodrigues.bricks.components;
 import fabiorodrigues.bricks.core.Component;
 import fabiorodrigues.bricks.core.State;
 import fabiorodrigues.bricks.style.Modifier;
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.skin.ComboBoxListViewSkin;
 import javafx.scene.layout.VBox;
-
-import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Lista de opcoes. Renderiza como um {@link ComboBox} JavaFX.
@@ -39,66 +40,30 @@ public class Dropdown<T> implements Component {
     private Consumer<T> onChange;
     private State<T> boundState;
 
-    /**
-     * Cria um dropdown com a lista de opcoes dada.
-     *
-     * @param options a lista de opcoes
-     */
     public Dropdown(List<T> options) {
         this.options = options;
     }
 
-    /**
-     * Define a opcao selecionada inicialmente.
-     *
-     * @param selected a opcao inicial
-     * @return este componente para encadeamento
-     */
     public Dropdown<T> selected(T selected) {
         this.selected = selected;
         return this;
     }
 
-    /**
-     * Adiciona um label acima do dropdown, alinhado a esquerda.
-     *
-     * @param label o texto do label
-     * @return este componente para encadeamento
-     */
     public Dropdown<T> label(String label) {
         this.label = label;
         return this;
     }
 
-    /**
-     * Liga este dropdown a um {@link State}. A selecao reflecte o valor do state
-     * e actualiza-o quando o utilizador escolhe uma opcao.
-     *
-     * @param state o state a ligar
-     * @return este componente para encadeamento
-     */
     public Dropdown<T> bindTo(State<T> state) {
         this.boundState = state;
         return this;
     }
 
-    /**
-     * Define um callback chamado quando a selecao muda.
-     *
-     * @param callback funcao que recebe o novo valor selecionado
-     * @return este componente para encadeamento
-     */
     public Dropdown<T> onChange(Consumer<T> callback) {
         this.onChange = callback;
         return this;
     }
 
-    /**
-     * Aplica um {@link Modifier} com propriedades visuais reutilizaveis.
-     *
-     * @param modifier o modifier a aplicar
-     * @return este componente para encadeamento
-     */
     public Dropdown<T> modifier(Modifier modifier) {
         this.modifier = modifier;
         return this;
@@ -116,6 +81,46 @@ public class Dropdown<T> implements Component {
         } else if (!options.isEmpty()) {
             comboBox.setValue(options.get(0));
         }
+
+        // onShown dispara depois do popup estar completamente inicializado
+        // propaga as stylesheets da Scene principal para o popup
+        comboBox.setOnShown(e -> {
+            if (comboBox.getSkin() instanceof ComboBoxListViewSkin<?> skin) {
+                Node popupContent = skin.getPopupContent();
+                if (
+                    popupContent != null &&
+                    popupContent.getScene() != null &&
+                    comboBox.getScene() != null
+                ) {
+                    popupContent
+                        .getScene()
+                        .getStylesheets()
+                        .setAll(comboBox.getScene().getStylesheets());
+                }
+            }
+        });
+
+        // Células do popup
+        comboBox.setCellFactory(lv ->
+            new ListCell<>() {
+                @Override
+                protected void updateItem(T item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? null : item.toString());
+                }
+            }
+        );
+
+        // Célula do botão
+        comboBox.setButtonCell(
+            new ListCell<>() {
+                @Override
+                protected void updateItem(T item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? null : item.toString());
+                }
+            }
+        );
 
         if (boundState != null) {
             comboBox.valueProperty().addListener((obs, oldVal, newVal) -> boundState.set(newVal));
