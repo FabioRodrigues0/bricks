@@ -3,7 +3,10 @@ package fabiorodrigues.bricks.style;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Labeled;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 /**
@@ -409,9 +412,11 @@ public class Modifier {
         // fill max
         if (fillMaxWidth) {
             node.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(node, Priority.ALWAYS);
         }
         if (fillMaxHeight) {
             node.setMaxHeight(Double.MAX_VALUE);
+            VBox.setVgrow(node, Priority.ALWAYS);
         }
 
         // opacidade

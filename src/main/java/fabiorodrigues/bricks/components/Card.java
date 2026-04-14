@@ -1,11 +1,10 @@
 package fabiorodrigues.bricks.components;
 
 import fabiorodrigues.bricks.core.Component;
-import javafx.geometry.Insets;
+import fabiorodrigues.bricks.style.Modifier;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
@@ -224,9 +223,10 @@ public class Card implements Component {
 
         boolean hasMargin = marginTop != 0 || marginRight != 0 || marginBottom != 0 || marginLeft != 0;
         if (hasMargin) {
-            StackPane wrapper = new StackPane(vbox);
-            wrapper.setPadding(new Insets(marginTop, marginRight, marginBottom, marginLeft));
-            return wrapper;
+            return new Box()
+                    .modifier(new Modifier().padding(marginTop, marginRight, marginBottom, marginLeft))
+                    .children(() -> vbox)
+                    .render();
         }
 
         return vbox;
