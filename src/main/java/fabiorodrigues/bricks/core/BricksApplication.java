@@ -51,6 +51,7 @@ public abstract class BricksApplication extends Application {
     private Scene scene;
     private double width = 800;
     private double height = 600;
+    private Stage stage;
 
     /**
      * Define a arvore de componentes da aplicacao. Chamado a cada re-render.
@@ -79,6 +80,10 @@ public abstract class BricksApplication extends Application {
         this.height = height;
     }
 
+    protected Stage getStage() {
+        return stage;
+    }
+
     /**
      * Define o tema visual da aplicacao.
      * Se chamado antes de {@code start()}, e aplicado no inicio.
@@ -104,6 +109,7 @@ public abstract class BricksApplication extends Application {
 
     @Override
     public void start(Stage stage) {
+        this.stage = stage;
         for (State<?> s : states) {
             s.addListener(() -> Platform.runLater(this::rerender));
         }
