@@ -43,59 +43,265 @@ public class MinhaApp extends BricksApplication {
 ## Requisitos
 
 - Java 17+
-- Maven 3.8+
+- Maven 3.8+ ou Gradle 8+
 
 ---
 
-## Instalação
+## Instalação e configuração
 
 ### Maven
 
-Primeiro, adicione o repositório JitPack ao seu `pom.xml`:
+**`pom.xml` completo de exemplo:**
 
 ```xml
-<repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.exemplo</groupId>
+    <artifactId>minha-app</artifactId>
+    <version>1.0.0</version>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+    <!-- 1. Repositório JitPack -->
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <!-- 2. Dependência do Bricks -->
+    <dependencies>
+        <dependency>
+            <groupId>com.github.fabiorodrigues0</groupId>
+            <artifactId>bricks</artifactId>
+            <version>0.4.3</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 3. Copiar dependências para target/dependency (necessário para o module-path) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>generate-sources</phase>
+                        <goals><goal>copy-dependencies</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 4. Compilador com module-path -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                    <compilerArgs>
+                        <arg>--module-path</arg>
+                        <arg>${project.build.directory}/dependency</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <!-- 5. Plugin para correr: mvn javafx:run -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>com.exemplo/com.exemplo.MinhaApp</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
 ```
 
-Depois, adicione a dependência do Bricks:
-
-```xml
-<dependency>
-    <groupId>com.github.fabiorodrigues0</groupId>
-    <artifactId>bricks</artifactId>
-    <version>0.3.0</version>
-</dependency>
-```
-
-### Gradle
-
-Primeiro, adicione o repositório JitPack ao seu `build.gradle`:
-
-```kotlin
-repositories {
-    mavenLocal()
-    maven {'https://jitpack.io'}
-}
-```
-
-Depois, adicione a dependência do Bricks:
-
-```kotlin
-dependencies {
-    implementation("com.github.fabiorodrigues0:bricks:0.4.0")
-}
-```
-
-Para instalar localmente: `mvn install`
+Para correr: `mvn javafx:run`
 
 ---
 
-## Estrutura
+### Gradle
+
+**`build.gradle.kts` completo de exemplo:**
+
+```kotlin
+plugins {
+    id("application")
+    id("org.openjfx.javafxplugin") version "0.1.0"
+}
+
+group = "com.exemplo"
+version = "1.0.0"
+
+java {
+    toolchain { languageVersion.set(JavaLanguageVersion.of(17)) }
+}
+
+// 1. Repositório JitPack
+repositories {
+    mavenCentral()
+    maven { url = uri("https://jitpack.io") }
+}
+
+// 2. Módulos JavaFX necessários
+javafx {
+    version = "21"
+    modules("javafx.controls", "javafx.graphics")
+}
+
+// 3. Dependência do Bricks
+dependencies {
+    implementation("com.github.fabiorodrigues0:bricks:0.4.3")
+}
+
+application {
+    mainModule.set("com.exemplo")           // nome do módulo em module-info.java
+    mainClass.set("com.exemplo.MinhaApp")
+}
+```
+
+Para correr: `gradle run`
+
+---
+
+## Estrutura do projeto
+
+```
+meu-projeto/
+├── pom.xml  (ou build.gradle.kts)
+├── config/
+│   ├── checkstyle/                        ← regras de estilo (opcional)
+│   ├── formatter/                         ← regras de formatação (opcional)
+│   └── database/
+│       └── DatabaseConfig.java           ← ligação à BD (SQLite por defeito, trocar aqui)
+├── database/
+│   ├── schema/
+│   │   └── DatabaseSchema.java           ← definição das tabelas
+│   └── seeds/
+│       └── DatabaseSeeder.java           ← dados iniciais
+└── src/
+    └── main/
+        ├── java/
+        │   ├── module-info.java           ← declara o módulo da app
+        │   └── com/exemplo/
+        │       └── App.java              ← extends BricksApplication
+        └── resources/
+            └── imagens/                   ← assets estáticos
+```
+
+### `module-info.java`
+
+Necessário para que o Java encontre os módulos do JavaFX e do Bricks:
+
+```java
+module com.exemplo {
+    requires fabiorodrigues.bricks;
+}
+```
+
+### `config/database/DatabaseConfig.java`
+
+Para usar MySQL ou PostgreSQL em vez de SQLite, cria este ficheiro em `config/database/`. O Bricks detecta-o automaticamente via `DB.autoConfig()`. Se o ficheiro não existir, usa SQLite e cria `./data/database.db` na raiz do projeto.
+
+```java
+package config.database;
+
+import fabiorodrigues.bricks.data.config.*;
+
+public class DatabaseConfig {
+    public DbConfig getConfig() {
+        return new MySQLConfig()
+            .host("localhost")
+            .database("minha_bd")
+            .user("root")
+            .password("pass");
+    }
+}
+```
+
+### `database/schema/DatabaseSchema.java`
+
+Define a estrutura das tabelas. Chamado uma vez no arranque da app via `Effect`:
+
+```java
+package database.schema;
+
+import fabiorodrigues.bricks.data.DB;
+
+public class DatabaseSchema {
+    public static void run() {
+        DB.query()
+            .createTableIfNotExists("utilizadores")
+            .column("id", "INTEGER PRIMARY KEY AUTOINCREMENT")
+            .column("nome", "TEXT NOT NULL")
+            .column("email", "TEXT NOT NULL")
+            .execute();
+    }
+}
+```
+
+### `database/seeds/DatabaseSeeder.java`
+
+Insere dados iniciais. Chamado após o schema estar criado:
+
+```java
+package database.seeds;
+
+import fabiorodrigues.bricks.data.DB;
+import java.util.Map;
+
+public class DatabaseSeeder {
+    public static void run() {
+        DB.query()
+            .insertInto("utilizadores")
+            .values(Map.of("nome", "Admin", "email", "admin@exemplo.com"))
+            .execute();
+    }
+}
+```
+
+### Ligar tudo em `App.java`
+
+```java
+import fabiorodrigues.bricks.core.*;
+import fabiorodrigues.bricks.data.DB;
+import database.schema.DatabaseSchema;
+import database.seeds.DatabaseSeeder;
+
+public class App extends BricksApplication {
+
+    {
+        setTitle("A Minha App");
+        DB.autoConfig();  // lê config/database/DatabaseConfig se existir, SQLite por defeito
+    }
+
+    private final Effect initDb = effect(() -> {
+        DatabaseSchema.run();
+        DatabaseSeeder.run();
+    });
+
+    @Override
+    public Component root() {
+        // ...
+    }
+
+    public static void main(String[] args) { launch(args); }
+}
+```
+
+---
+
+## Estrutura interna da lib
 
 ```
 fabiorodrigues.bricks
@@ -105,6 +311,7 @@ fabiorodrigues.bricks
 │   ├── State<T>            — estado reativo
 │   └── DerivedState<T>     — estado calculado a partir de outros estados
 ├── components/             — componentes de UI
+├── data/                   — acesso a base de dados (DB, Query, configs)
 └── style/
     ├── Modifier            — propriedades visuais reutilizáveis
     ├── BricksTheme         — sistema de temas Material 3
