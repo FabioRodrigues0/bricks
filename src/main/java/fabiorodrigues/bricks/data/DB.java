@@ -115,11 +115,14 @@ public final class DB {
     }
 
     /**
-     * Configura a base de dados automaticamente a partir de uma classe {@code DatabaseConfig}
+     * Configura a base de dados automaticamente a partir de {@code config.database.DatabaseConfig}
      * no classpath. Se nao existir, usa SQLite por defeito.
      *
-     * <p>A classe deve ter um metodo {@code getConfig()} que devolve um {@link DbConfig}:</p>
+     * <p>Criar {@code config/database/DatabaseConfig.java} no projeto:</p>
      * <pre>{@code
+     * package config.database;
+     * import fabiorodrigues.bricks.data.config.*;
+     *
      * public class DatabaseConfig {
      *     public DbConfig getConfig() {
      *         return new MySQLConfig().host("localhost").database("app").user("root").password("pass");
@@ -129,7 +132,7 @@ public final class DB {
      */
     public static synchronized void autoConfig() {
         try {
-            Class<?> configClass = Class.forName("DatabaseConfig");
+            Class<?> configClass = Class.forName("config.database.DatabaseConfig");
             Object instance = configClass.getDeclaredConstructor().newInstance();
             java.lang.reflect.Method method = configClass.getMethod("getConfig");
             DbConfig dbConfig = (DbConfig) method.invoke(instance);
