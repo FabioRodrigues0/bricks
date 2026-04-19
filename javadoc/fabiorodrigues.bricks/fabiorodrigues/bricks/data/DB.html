@@ -150,23 +150,29 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#configure(fabiorodrigues.bricks.data.config.DbConfig)" class="member-name-link">configure</a><wbr>(<a href="config/DbConfig.html" title="class in fabiorodrigues.bricks.data.config">DbConfig</a>&nbsp;dbConfig)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#autoConfig()" class="member-name-link">autoConfig</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Configura a base de dados automaticamente a partir de uma classe <code>DatabaseConfig</code>
+ no classpath.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#configure(fabiorodrigues.bricks.data.config.DbConfig)" class="member-name-link">configure</a><wbr>(<a href="config/DbConfig.html" title="class in fabiorodrigues.bricks.data.config">DbConfig</a>&nbsp;dbConfig)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Define a configuracao de base de dados a usar.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="config/DbConfig.html" title="class in fabiorodrigues.bricks.data.config">DbConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getConfig()" class="member-name-link">getConfig</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="config/DbConfig.html" title="class in fabiorodrigues.bricks.data.config">DbConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getConfig()" class="member-name-link">getConfig</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Devolve a configuracao atualmente ativa.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.sql/java/sql/Connection.html" title="class or interface in java.sql" class="external-link">Connection</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getConnection()" class="member-name-link">getConnection</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.sql/java/sql/Connection.html" title="class or interface in java.sql" class="external-link">Connection</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getConnection()" class="member-name-link">getConnection</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Devolve a conexao ativa, criando uma nova se nao existir ou tiver fechado.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#query()" class="member-name-link">query</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#query()" class="member-name-link">query</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Cria uma nova <a href="Query.html" title="class in fabiorodrigues.bricks.data"><code>Query</code></a> com a configuracao atual.</div>
 </div>
 </div>
@@ -225,6 +231,23 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd>a configuracao de base de dados</dd>
 </dl>
+</section>
+</li>
+<li>
+<section class="detail" id="autoConfig()">
+<h3>autoConfig</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">autoConfig</span>()</div>
+<div class="block">Configura a base de dados automaticamente a partir de uma classe <code>DatabaseConfig</code>
+ no classpath. Se nao existir, usa SQLite por defeito.
+
+ <p>A classe deve ter um metodo <code>getConfig()</code> que devolve um <a href="config/DbConfig.html" title="class in fabiorodrigues.bricks.data.config"><code>DbConfig</code></a>:</p>
+ <pre><code>
+ public class DatabaseConfig {
+     public DbConfig getConfig() {
+         return new MySQLConfig().host("localhost").database("app").user("root").password("pass");
+     }
+ }
+ </code></pre></div>
 </section>
 </li>
 <li>
