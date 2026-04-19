@@ -110,14 +110,14 @@ public abstract class BricksApplication extends Application {
     @Override
     public void start(Stage stage) {
         this.stage = stage;
-        for (State<?> s : states) {
-            s.addListener(() -> Platform.runLater(this::rerender));
-        }
-
         ThemeRegistry.set(theme);
 
         container = new StackPane();
         rerender();
+
+        for (State<?> s : states) {
+            s.addListener(() -> Platform.runLater(this::rerender));
+        }
 
         scene = new Scene(container, width, height);
         applyThemeToScene(scene);
@@ -130,6 +130,7 @@ public abstract class BricksApplication extends Application {
      * Reconstroi a arvore de componentes e atualiza a janela.
      */
     protected void rerender() {
+        if (container == null) return;
         container.getChildren().clear();
         container.getChildren().add(root().render());
     }
