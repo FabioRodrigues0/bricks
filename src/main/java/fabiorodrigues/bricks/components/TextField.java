@@ -4,9 +4,12 @@ import fabiorodrigues.bricks.core.Component;
 import fabiorodrigues.bricks.core.State;
 import fabiorodrigues.bricks.style.Modifier;
 import java.util.function.Consumer;
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.TextInputControl;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 
 /**
@@ -33,6 +36,7 @@ import javafx.scene.layout.VBox;
  * TextField campo = new TextField().label("Nome:").value("inicial");
  * new Button("Guardar").onClick(() -> System.out.println(campo.getValue()));
  * }</pre>
+ *
  */
 public class TextField implements Component {
 
@@ -46,6 +50,11 @@ public class TextField implements Component {
     private Consumer<String> onChange;
     private State<String> boundState;
     private TextInputControl control;
+
+    private boolean autoFocus = false;
+    private boolean hideCursor = false;
+    private String inputFilter = null;
+    private Consumer<KeyEvent> onKeyPressed = null;
 
     /**
      * Adiciona um label acima do campo, alinhado a esquerda.
@@ -114,6 +123,63 @@ public class TextField implements Component {
     }
 
     /**
+     * Ativa o foco automatico neste campo quando a janela ganha foco.
+     * Util em ecras onde o utilizador deve comecar a escrever imediatamente.
+     *
+     * <pre>{@code
+     * new TextField().autoFocus()
+     * }</pre>
+     *
+     * @return este componente para encadeamento
+     */
+    public TextField autoFocus() {
+        this.autoFocus = true;
+        return this;
+    }
+
+    /**
+     * Esconde o cursor de texto (caret). Util em calculadoras e campos
+     * onde o cursor visual e indesejado.
+     *
+     * <pre>{@code
+     * new TextField().hideCursor()
+     * }</pre>
+     *
+     * @return este componente para encadeamento
+     */
+    public TextField hideCursor() {
+        this.hideCursor = true;
+        return this;
+    }
+
+    /**
+     * Filtra o input aceite pelo campo. Apenas caracteres que correspondam
+     * ao regex sao aceites — os restantes sao ignorados silenciosamente.
+     *
+     *
+     * <p>Exemplo para calculadora: use o regex [0-9+\-*\/.] para aceitar numeros e operadores.</p>
+     *
+     * @param allowedCharsRegex expressao regular dos caracteres permitidos
+     * @return este componente para encadeamento
+     */
+    public TextField inputFilter(String allowedCharsRegex) {
+        this.inputFilter = allowedCharsRegex;
+        return this;
+    }
+
+    /**
+     * Define um callback chamado quando uma tecla e pressionada no campo.
+     * Util para interceptar teclas especiais como operadores ou Enter.
+     *
+     * @param callback funcao que recebe o KeyEvent da tecla pressionada
+     * @return este componente para encadeamento
+     */
+    public TextField onKeyPressed(Consumer<KeyEvent> callback) {
+        this.onKeyPressed = callback;
+        return this;
+    }
+
+    /**
      * Liga este campo a um {@link State}. O campo usa o valor atual do state como valor inicial,
      * e atualiza o state automaticamente quando o utilizador escreve.
      *
@@ -166,33 +232,70 @@ public class TextField implements Component {
         String initialValue = boundState != null ? boundState.get() : value;
 
         if (isMultiline) {
-            javafx.scene.control.TextArea area =
-                new javafx.scene.control.TextArea(initialValue);
+            javafx.scene.control.TextArea area = new javafx.scene.control.TextArea(initialValue);
             area.setPromptText(placeholder);
             area.setPrefRowCount(rows);
             area.setWrapText(wrapText);
             area.getStyleClass().add("bricks-text-area");
             control = area;
         } else {
-            javafx.scene.control.TextField field =
-                new javafx.scene.control.TextField(initialValue);
+            javafx.scene.control.TextField field = new javafx.scene.control.TextField(initialValue);
             field.setPromptText(placeholder);
             field.getStyleClass().add("bricks-text-field");
             control = field;
         }
 
+        // Filtro de input — apenas aceita caracteres que correspondam ao regex
+        if (inputFilter != null) {
+            final String pattern = inputFilter;
+            control.setTextFormatter(
+                new TextFormatter<>(change -> {
+                    if (change.getText().matches(pattern + "*")) return change;
+                    return null;
+                })
+            );
+        }
+
+        // Cursor invisivel
+        if (hideCursor) {
+            String existing = control.getStyle();
+            control.setStyle(existing + "-fx-caret-color: transparent;");
+        }
+
+        // Foco automatico — pede foco imediatamente e sempre que a janela ganhar foco
+        if (autoFocus) {
+            Platform.runLater(control::requestFocus);
+            control
+                .sceneProperty()
+                .addListener((obs, oldScene, newScene) -> {
+                    if (newScene != null) {
+                        newScene
+                            .windowProperty()
+                            .addListener((obs2, oldWin, newWin) -> {
+                                if (newWin != null) {
+                                    newWin
+                                        .focusedProperty()
+                                        .addListener((obs3, wasFocused, isFocused) -> {
+                                            if (isFocused) Platform.runLater(control::requestFocus);
+                                        });
+                                }
+                            });
+                    }
+                });
+        }
+
+        if (onKeyPressed != null) {
+            control.setOnKeyPressed(e -> onKeyPressed.accept(e));
+        }
+
         if (boundState != null) {
             control
                 .textProperty()
-                .addListener((obs, oldVal, newVal) ->
-                    boundState.setQuietly(newVal)
-                );
+                .addListener((obs, oldVal, newVal) -> boundState.setQuietly(newVal));
         }
 
         if (onChange != null) {
-            control
-                .textProperty()
-                .addListener((obs, oldVal, newVal) -> onChange.accept(newVal));
+            control.textProperty().addListener((obs, oldVal, newVal) -> onChange.accept(newVal));
         }
 
         if (modifier != null) {
