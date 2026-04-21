@@ -52,6 +52,7 @@ public abstract class BricksApplication extends Application {
     private double width = 800;
     private double height = 600;
     private Stage stage;
+    private BricksScene currentScene = null;
 
     /**
      * Define a arvore de componentes da aplicacao. Chamado a cada re-render.
@@ -192,6 +193,52 @@ public abstract class BricksApplication extends Application {
         DerivedState<T> ds = new DerivedState<>(supplier, dependencies);
         ds.setOnChanged(() -> Platform.runLater(this::rerender));
         return ds;
+    }
+
+    /**
+     * Define a scene inicial da aplicacao.
+     * Quem usa scenes deve implementar root() delegando para a scene atual:
+     *
+     * <pre>{@code
+     * {
+     *     setInitialScene(new LobbyScene(this));
+     * }
+     *
+     * @Override
+     * public Component root() {
+     *     return currentScene() != null ? currentScene().render() : new Text("Sem scene definida");
+     * }
+     * }</pre>
+     *
+     * @param scene a scene inicial
+     */
+    protected void setInitialScene(BricksScene scene) {
+        this.currentScene = scene;
+    }
+
+    /**
+     * Navega para uma nova scene, substituindo a atual.
+     * A scene anterior e descartada — os seus states locais sao perdidos.
+     * Para manter estado entre navegacoes, usar states definidos no BricksApplication.
+     *
+     * <pre>{@code
+     * app.navigateTo(new ProfessorScene(this));
+     * }</pre>
+     *
+     * @param scene a nova scene a mostrar
+     */
+    public void navigateTo(BricksScene scene) {
+        this.currentScene = scene;
+        rerender();
+    }
+
+    /**
+     * Devolve a scene atual, ou null se nao foi definida via setInitialScene.
+     *
+     * @return a scene atual
+     */
+    protected BricksScene currentScene() {
+        return currentScene;
     }
 
     /**
