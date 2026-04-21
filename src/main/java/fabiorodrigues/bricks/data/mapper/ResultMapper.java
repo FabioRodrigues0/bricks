@@ -1,6 +1,8 @@
 package fabiorodrigues.bricks.data.mapper;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.RecordComponent;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -100,27 +102,106 @@ public class ResultMapper {
      */
     @SuppressWarnings("unchecked")
     public static <T> T map(ResultSet rs, Class<T> type) throws Exception {
-        if (!type.isRecord()) {
-            throw new UnsupportedOperationException(
-                "Apenas Java records sao suportados. Recebido: " + type.getName());
+        if (type.isRecord()) {
+            RecordComponent[] components = type.getRecordComponents();
+            Set<String> columns = getColumnNames(rs.getMetaData());
+            Object[] args = new Object[components.length];
+
+            for (int i = 0; i < components.length; i++) {
+                RecordComponent comp = components[i];
+                if (List.class.isAssignableFrom(comp.getType())) {
+                    args[i] = new ArrayList<>();
+                } else {
+                    args[i] = getValue(rs, columns, comp.getName(), comp.getType());
+                }
+            }
+
+            Constructor<T> ctor = (Constructor<T>) type.getDeclaredConstructors()[0];
+            ctor.setAccessible(true);
+            return ctor.newInstance(args);
         }
 
-        RecordComponent[] components = type.getRecordComponents();
         Set<String> columns = getColumnNames(rs.getMetaData());
-        Object[] args = new Object[components.length];
 
-        for (int i = 0; i < components.length; i++) {
-            RecordComponent comp = components[i];
-            if (List.class.isAssignableFrom(comp.getType())) {
-                args[i] = new ArrayList<>();
+        // Tenta construtor com parametros que batem com as colunas (por nome ou por posicao)
+        Constructor<?>[] ctors = type.getDeclaredConstructors();
+        Arrays.sort(ctors, (a, b) -> b.getParameterCount() - a.getParameterCount());
+
+        for (Constructor<?> ctor : ctors) {
+            int paramCount = ctor.getParameterCount();
+            if (paramCount == 0) continue;
+
+            Parameter[] params = ctor.getParameters();
+            Object[] args = new Object[paramCount];
+            boolean matched = true;
+
+            // Tenta por nome (requer compilacao com -parameters)
+            if (params[0].isNamePresent()) {
+                for (int i = 0; i < params.length; i++) {
+                    String colName = findColumn(columns, params[i].getName());
+                    if (!columns.contains(colName.toLowerCase())) { matched = false; break; }
+                    args[i] = getValue(rs, columns, params[i].getName(), params[i].getType());
+                }
             } else {
-                args[i] = getValue(rs, columns, comp.getName(), comp.getType());
+                // Fallback: por posicao das colunas
+                List<String> colList = new ArrayList<>(columns);
+                if (paramCount > colList.size()) continue;
+                for (int i = 0; i < paramCount; i++) {
+                    args[i] = getValue(rs, columns, colList.get(i), params[i].getType());
+                }
+            }
+
+            if (matched) {
+                ctor.setAccessible(true);
+                return type.cast(ctor.newInstance(args));
             }
         }
 
-        Constructor<T> ctor = (Constructor<T>) type.getDeclaredConstructors()[0];
-        ctor.setAccessible(true);
-        return ctor.newInstance(args);
+        // Tenta construtor vazio + setters
+        try {
+            Constructor<?> emptyCtor = type.getDeclaredConstructor();
+            emptyCtor.setAccessible(true);
+            Object instance = emptyCtor.newInstance();
+
+            for (String col : columns) {
+                String setterName = toSetterName(col);
+                for (Method m : getAllMethods(type)) {
+                    if (m.getName().equals(setterName) && m.getParameterCount() == 1) {
+                        Object val = getValue(rs, columns, col, m.getParameterTypes()[0]);
+                        m.setAccessible(true);
+                        m.invoke(instance, val);
+                        break;
+                    }
+                }
+            }
+
+            return type.cast(instance);
+        } catch (NoSuchMethodException ignored) {}
+
+        throw new UnsupportedOperationException(
+            "Nao foi possivel mapear para " + type.getName() +
+            ". A classe precisa de um construtor compativel com as colunas ou de construtor vazio com setters.");
+    }
+
+    private static List<Method> getAllMethods(Class<?> type) {
+        List<Method> methods = new ArrayList<>();
+        Class<?> current = type;
+        while (current != null && current != Object.class) {
+            methods.addAll(Arrays.asList(current.getDeclaredMethods()));
+            current = current.getSuperclass();
+        }
+        return methods;
+    }
+
+    private static String toSetterName(String colName) {
+        String[] parts = colName.split("_");
+        StringBuilder sb = new StringBuilder("set");
+        for (String part : parts) {
+            if (part.isEmpty()) continue;
+            sb.append(Character.toUpperCase(part.charAt(0)));
+            sb.append(part.substring(1));
+        }
+        return sb.toString();
     }
 
     @SuppressWarnings("unchecked")
