@@ -284,6 +284,28 @@ public class Query {
     }
 
     /**
+     * Adiciona um par campo-valor ao INSERT, de forma individual e legivel.
+     * Alternativa ao {@link #values(Map)} para melhor clareza visual.
+     *
+     * <pre>{@code
+     * DB.query()
+     *     .insertInto("professores")
+     *     .value("nome", "Joao Silva")
+     *     .value("grau", "Doutor")
+     *     .execute();
+     * }</pre>
+     *
+     * @param field nome da coluna
+     * @param val   valor a inserir
+     * @return esta query para encadeamento
+     */
+    public Query value(String field, Object val) {
+        if (this.insertVals == null) this.insertVals = new java.util.LinkedHashMap<>();
+        this.insertVals.put(field, val);
+        return this;
+    }
+
+    /**
      * Ativa upsert — em caso de chave duplicada, atualiza os campos indicados.
      * Em SQLite usa {@code INSERT OR REPLACE}; em MySQL usa {@code ON DUPLICATE KEY UPDATE};
      * em PostgreSQL usa {@code ON CONFLICT ... DO UPDATE SET} (ver {@link #conflictOn(String)}).
