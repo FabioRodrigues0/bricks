@@ -55,11 +55,14 @@ public class ResultMapper {
      * @throws Exception se ocorrer erro de reflexao ou SQL
      */
     @SuppressWarnings("unchecked")
-    public static <T> List<T> mapGrouped(ResultSet rs,
-                                          Class<T> parentClass, String parentKey,
-                                          String childListField, Class<?> childClass, String childKey)
-            throws Exception {
-
+    public static <T> List<T> mapGrouped(
+        ResultSet rs,
+        Class<T> parentClass,
+        String parentKey,
+        String childListField,
+        Class<?> childClass,
+        String childKey
+    ) throws Exception {
         Map<Object, T> parents = new LinkedHashMap<>();
         Map<Object, List<Object>> childrenByParent = new LinkedHashMap<>();
         Set<String> seenChildKeys = new HashSet<>();
@@ -85,8 +88,14 @@ public class ResultMapper {
 
         List<T> result = new ArrayList<>();
         for (Object key : parents.keySet()) {
-            result.add(setChildList(parents.get(key), parentClass, childListField,
-                childrenByParent.get(key)));
+            result.add(
+                setChildList(
+                    parents.get(key),
+                    parentClass,
+                    childListField,
+                    childrenByParent.get(key)
+                )
+            );
         }
         return result;
     }
@@ -139,7 +148,10 @@ public class ResultMapper {
             if (params[0].isNamePresent()) {
                 for (int i = 0; i < params.length; i++) {
                     String colName = findColumn(columns, params[i].getName());
-                    if (!columns.contains(colName.toLowerCase())) { matched = false; break; }
+                    if (!columns.contains(colName.toLowerCase())) {
+                        matched = false;
+                        break;
+                    }
                     args[i] = getValue(rs, columns, params[i].getName(), params[i].getType());
                 }
             } else {
@@ -179,8 +191,10 @@ public class ResultMapper {
         } catch (NoSuchMethodException ignored) {}
 
         throw new UnsupportedOperationException(
-            "Nao foi possivel mapear para " + type.getName() +
-            ". A classe precisa de um construtor compativel com as colunas ou de construtor vazio com setters.");
+            "Nao foi possivel mapear para " +
+                type.getName() +
+                ". A classe precisa de um construtor compativel com as colunas ou de construtor vazio com setters."
+        );
     }
 
     private static List<Method> getAllMethods(Class<?> type) {
@@ -205,8 +219,12 @@ public class ResultMapper {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T mapWithPlaceholder(ResultSet rs, Class<T> type,
-                                             String skipField, Object placeholder) throws Exception {
+    private static <T> T mapWithPlaceholder(
+        ResultSet rs,
+        Class<T> type,
+        String skipField,
+        Object placeholder
+    ) throws Exception {
         RecordComponent[] components = type.getRecordComponents();
         Set<String> columns = getColumnNames(rs.getMetaData());
         Object[] args = new Object[components.length];
@@ -228,8 +246,12 @@ public class ResultMapper {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T setChildList(T parent, Class<T> cls,
-                                       String listFieldName, List<?> children) throws Exception {
+    private static <T> T setChildList(
+        T parent,
+        Class<T> cls,
+        String listFieldName,
+        List<?> children
+    ) throws Exception {
         RecordComponent[] components = cls.getRecordComponents();
         Object[] args = new Object[components.length];
 
@@ -262,19 +284,24 @@ public class ResultMapper {
         return fieldName; // fallback — deixa o JDBC lancar erro se nao existir
     }
 
-    private static Object getValue(ResultSet rs, Set<String> columns,
-                                    String fieldName, Class<?> type) throws SQLException {
+    @SuppressWarnings("unchecked")
+    private static Object getValue(
+        ResultSet rs,
+        Set<String> columns,
+        String fieldName,
+        Class<?> type
+    ) throws SQLException {
         String col = findColumn(columns, fieldName);
         if (!columns.contains(col.toLowerCase())) {
             return getDefault(type);
         }
 
-        if (type == int.class || type == Integer.class)         return rs.getInt(col);
-        if (type == long.class || type == Long.class)           return rs.getLong(col);
-        if (type == double.class || type == Double.class)       return rs.getDouble(col);
-        if (type == float.class || type == Float.class)         return rs.getFloat(col);
-        if (type == boolean.class || type == Boolean.class)     return rs.getBoolean(col);
-        if (type == String.class)                               return rs.getString(col);
+        if (type == int.class || type == Integer.class) return rs.getInt(col);
+        if (type == long.class || type == Long.class) return rs.getLong(col);
+        if (type == double.class || type == Double.class) return rs.getDouble(col);
+        if (type == float.class || type == Float.class) return rs.getFloat(col);
+        if (type == boolean.class || type == Boolean.class) return rs.getBoolean(col);
+        if (type == String.class) return rs.getString(col);
         if (type == LocalDate.class) {
             java.sql.Date d = rs.getDate(col);
             return d != null ? d.toLocalDate() : null;
@@ -283,14 +310,19 @@ public class ResultMapper {
             java.sql.Timestamp ts = rs.getTimestamp(col);
             return ts != null ? ts.toLocalDateTime() : null;
         }
+        if (type.isEnum()) {
+            String val = rs.getString(col);
+            if (val == null) return null;
+            return Enum.valueOf((Class<Enum>) type, val);
+        }
         return rs.getObject(col);
     }
 
     private static Object getDefault(Class<?> type) {
-        if (type == int.class)     return 0;
-        if (type == long.class)    return 0L;
-        if (type == double.class)  return 0.0;
-        if (type == float.class)   return 0f;
+        if (type == int.class) return 0;
+        if (type == long.class) return 0L;
+        if (type == double.class) return 0.0;
+        if (type == float.class) return 0f;
         if (type == boolean.class) return false;
         return null;
     }
