@@ -313,7 +313,21 @@ public class ResultMapper {
         if (type.isEnum()) {
             String val = rs.getString(col);
             if (val == null) return null;
-            return Enum.valueOf((Class<Enum>) type, val);
+            for (Object constant : type.getEnumConstants()) {
+                Enum<?> e = (Enum<?>) constant;
+                // Tenta pelo nome exato ou case-insensitive
+                if (e.name().equals(val) || e.name().equalsIgnoreCase(val)) return e;
+                // Tenta pelo campo label se existir
+                try {
+                    java.lang.reflect.Field labelField = type.getDeclaredField("label");
+                    labelField.setAccessible(true);
+                    Object labelVal = labelField.get(constant);
+                    if (val.equals(labelVal)) return e;
+                } catch (Exception ignored) {}
+            }
+            throw new IllegalArgumentException(
+                "Valor '" + val + "' nao encontrado no enum " + type.getSimpleName()
+            );
         }
         return rs.getObject(col);
     }
