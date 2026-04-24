@@ -8,6 +8,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -169,6 +170,26 @@ public class DataTable<T> implements Component {
     public DataTable<T> column(String name, Function<T, String> valueFunction) {
         lastColumn = new DataTableColumn<>(name, valueFunction);
         columns.add(lastColumn);
+        return this;
+    }
+
+    /**
+     * Adiciona uma coluna com configuracao inline via lambda.
+     *
+     * <pre>{@code
+     * .column("Nome", Aluno::getNome, col -> col.width(250).bold().wrapText())
+     * }</pre>
+     *
+     * @param name          cabecalho da coluna
+     * @param valueFunction funcao que extrai o valor como String
+     * @param config        lambda de configuracao da coluna
+     * @return este componente para encadeamento
+     */
+    public DataTable<T> column(String name, Function<T, String> valueFunction,
+                               Consumer<DataTableColumn<T>> config) {
+        lastColumn = new DataTableColumn<>(name, valueFunction);
+        columns.add(lastColumn);
+        if (config != null) config.accept(lastColumn);
         return this;
     }
 

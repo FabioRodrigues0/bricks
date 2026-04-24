@@ -33,4 +33,9 @@ public class DataTableColumn<T> {
     void setAlign(Align align) { this.align = align; }
     void setBold(boolean bold) { this.bold = bold; }
     void setWrapText(boolean wrapText) { this.wrapText = wrapText; }
+
+    public DataTableColumn<T> width(double width) { this.width = width; return this; }
+    public DataTableColumn<T> align(Align align) { this.align = align; return this; }
+    public DataTableColumn<T> bold() { this.bold = true; return this; }
+    public DataTableColumn<T> wrapText() { this.wrapText = true; return this; }
 }
