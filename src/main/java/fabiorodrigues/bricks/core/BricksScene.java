@@ -61,6 +61,25 @@ public abstract class BricksScene {
     }
 
     /**
+     * Regista um ViewModel nesta scene, ligando-o ao ciclo de re-render da app.
+     * Deve ser chamado no construtor da scene, antes de usar o ViewModel.
+     *
+     * <pre>{@code
+     * public ProfessorScene(BricksApplication app, ProfessorViewModel vm) {
+     *     super(app);
+     *     use(vm);
+     *     this.vm = vm;
+     *     vm.carregarDisciplinas();
+     * }
+     * }</pre>
+     *
+     * @param vm o ViewModel a registar
+     */
+    protected void use(BricksViewModel vm) {
+        vm.attach(app);
+    }
+
+    /**
      * Define a UI desta scene. Chamado pelo BricksApplication em cada re-render.
      *
      * @return o componente raiz da scene
