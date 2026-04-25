@@ -1,6 +1,8 @@
 package fabiorodrigues.bricks.core;
 
+import java.util.ArrayList;
 import java.util.List;
+import javafx.application.Platform;
 
 /**
  * Classe base para ViewModels Bricks.
@@ -27,6 +29,7 @@ import java.util.List;
 public abstract class BricksViewModel {
 
     private BricksApplication app;
+    private final List<StateList<?>> pendingStateLists = new ArrayList<>();
 
     /**
      * Ligado ao BricksApplication — chamado automaticamente por BricksScene.use().
@@ -34,6 +37,10 @@ public abstract class BricksViewModel {
      */
     final void attach(BricksApplication app) {
         this.app = app;
+        for (StateList<?> sl : pendingStateLists) {
+            sl.addListener(() -> Platform.runLater(app::rerender));
+        }
+        pendingStateLists.clear();
     }
 
     /**
@@ -42,7 +49,7 @@ public abstract class BricksViewModel {
      */
     protected <T> State<T> state(T initial) {
         State<T> s = new State<>(initial);
-        s.addListener(() -> javafx.application.Platform.runLater(app::rerender));
+        s.addListener(() -> Platform.runLater(app::rerender));
         return s;
     }
 
@@ -52,7 +59,11 @@ public abstract class BricksViewModel {
      */
     protected <T> StateList<T> stateList(List<T> initial) {
         StateList<T> sl = new StateList<>(initial);
-        sl.addListener(() -> javafx.application.Platform.runLater(app::rerender));
+        if (app != null) {
+            sl.addListener(() -> Platform.runLater(app::rerender));
+        } else {
+            pendingStateLists.add(sl);
+        }
         return sl;
     }
 }

@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.fabiorodrigues0</groupId>
     <artifactId>bricks</artifactId>
-    <version>0.5.2</version>
+    <version>0.5.2.1</version>
     <packaging>jar</packaging>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
