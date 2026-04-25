@@ -29,6 +29,7 @@ import javafx.application.Platform;
 public abstract class BricksViewModel {
 
     private BricksApplication app;
+    private final List<State<?>> pendingStates = new ArrayList<>();
     private final List<StateList<?>> pendingStateLists = new ArrayList<>();
 
     /**
@@ -37,6 +38,10 @@ public abstract class BricksViewModel {
      */
     final void attach(BricksApplication app) {
         this.app = app;
+        for (State<?> s : pendingStates) {
+            s.addListener(() -> Platform.runLater(app::rerender));
+        }
+        pendingStates.clear();
         for (StateList<?> sl : pendingStateLists) {
             sl.addListener(() -> Platform.runLater(app::rerender));
         }
@@ -49,7 +54,11 @@ public abstract class BricksViewModel {
      */
     protected <T> State<T> state(T initial) {
         State<T> s = new State<>(initial);
-        s.addListener(() -> Platform.runLater(app::rerender));
+        if (app != null) {
+            s.addListener(() -> Platform.runLater(app::rerender));
+        } else {
+            pendingStates.add(s);
+        }
         return s;
     }
 
