@@ -34,8 +34,33 @@ public class DataTableColumn<T> {
     void setBold(boolean bold) { this.bold = bold; }
     void setWrapText(boolean wrapText) { this.wrapText = wrapText; }
 
+    /**
+     * Define a largura fixa (px) desta coluna.
+     *
+     * @param width largura em pixels
+     * @return esta coluna para encadeamento
+     */
     public DataTableColumn<T> width(double width) { this.width = width; return this; }
+
+    /**
+     * Define o alinhamento do conteudo desta coluna.
+     *
+     * @param align {@link Align#LEFT}, {@link Align#CENTER} ou {@link Align#RIGHT}
+     * @return esta coluna para encadeamento
+     */
     public DataTableColumn<T> align(Align align) { this.align = align; return this; }
+
+    /**
+     * Aplica negrito ao conteudo desta coluna.
+     *
+     * @return esta coluna para encadeamento
+     */
     public DataTableColumn<T> bold() { this.bold = true; return this; }
+
+    /**
+     * Ativa o word wrap no conteudo desta coluna.
+     *
+     * @return esta coluna para encadeamento
+     */
     public DataTableColumn<T> wrapText() { this.wrapText = true; return this; }
 }

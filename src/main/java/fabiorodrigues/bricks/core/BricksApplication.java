@@ -81,7 +81,7 @@ public abstract class BricksApplication extends Application {
         this.height = height;
     }
 
-    protected Stage getStage() {
+    public Stage getStage() {
         return stage;
     }
 

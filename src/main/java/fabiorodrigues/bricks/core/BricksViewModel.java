@@ -51,6 +51,10 @@ public abstract class BricksViewModel {
     /**
      * Cria um State ligado ao re-render da app.
      * Quando o valor muda, a UI atualiza automaticamente.
+     *
+     * @param initial o valor inicial
+     * @param <T>     o tipo do valor
+     * @return o estado criado
      */
     protected <T> State<T> state(T initial) {
         State<T> s = new State<>(initial);
@@ -65,6 +69,10 @@ public abstract class BricksViewModel {
     /**
      * Cria um StateList ligado ao re-render da app.
      * Quando a lista muda, a UI atualiza automaticamente.
+     *
+     * @param initial lista com os valores iniciais
+     * @param <T>     o tipo dos elementos
+     * @return o StateList criado
      */
     protected <T> StateList<T> stateList(List<T> initial) {
         StateList<T> sl = new StateList<>(initial);
