@@ -26,7 +26,7 @@ import javafx.scene.paint.Color;
  * <ul>
  *   <li><b>Layout:</b> {@link #padding}, {@link #margin}, {@link #width}, {@link #height}, {@link #size}, {@link #gap}, {@link #fillMaxWidth}, {@link #fillMaxHeight}, {@link #alignment}</li>
  *   <li><b>Texto:</b> {@link #fontSize}, {@link #fontFamily}, {@link #bold}, {@link #italic}, {@link #textColor}</li>
- *   <li><b>Visual:</b> {@link #background}, {@link #border}, {@link #borderRadius}, {@link #opacity}, {@link #visible}</li>
+ *   <li><b>Visual:</b> {@link #background}, {@link #backgroundGradient(Color, Color)}, {@link #border}, {@link #borderRadius}, {@link #opacity}, {@link #visible}</li>
  * </ul>
  */
 public class Modifier {
@@ -47,6 +47,9 @@ public class Modifier {
     private Color textColor;
 
     private Color backgroundColor;
+    private Color gradientFrom = null;
+    private Color gradientTo = null;
+    private double gradientAngle = 135;
     private Color borderColor;
     private double borderWidth = -1;
     private double borderRadius = -1;
@@ -297,6 +300,44 @@ public class Modifier {
     }
 
     /**
+     * Define um gradiente linear como fundo do componente.
+     * Direcao por defeito: 135 graus (diagonal superior-esquerda para inferior-direita).
+     *
+     * <pre>{@code
+     * new Modifier().backgroundGradient(Color.web("#6c3483"), Color.web("#1a5276"))
+     * }</pre>
+     *
+     * @param from cor inicial do gradiente
+     * @param to   cor final do gradiente
+     * @return este modifier para encadeamento
+     */
+    public Modifier backgroundGradient(Color from, Color to) {
+        this.gradientFrom = from;
+        this.gradientTo = to;
+        this.gradientAngle = 135;
+        return this;
+    }
+
+    /**
+     * Define um gradiente linear como fundo com angulo personalizado.
+     *
+     * <pre>{@code
+     * new Modifier().backgroundGradient(Color.web("#6c3483"), Color.web("#1a5276"), 90)
+     * }</pre>
+     *
+     * @param from  cor inicial do gradiente
+     * @param to    cor final do gradiente
+     * @param angle angulo em graus (0 = esquerda para direita, 90 = cima para baixo, 135 = diagonal)
+     * @return este modifier para encadeamento
+     */
+    public Modifier backgroundGradient(Color from, Color to, double angle) {
+        this.gradientFrom = from;
+        this.gradientTo = to;
+        this.gradientAngle = angle;
+        return this;
+    }
+
+    /**
      * Define uma borda com cor e espessura.
      *
      * <pre>{@code
@@ -440,6 +481,19 @@ public class Modifier {
                 (int) (backgroundColor.getBlue() * 255)));
         }
 
+        if (gradientFrom != null && gradientTo != null) {
+            double rad = Math.toRadians(gradientAngle);
+            double x1 = 50 - 50 * Math.sin(rad);
+            double y1 = 50 - 50 * Math.cos(rad);
+            double x2 = 50 + 50 * Math.sin(rad);
+            double y2 = 50 + 50 * Math.cos(rad);
+            css.append(String.format(java.util.Locale.US,
+                "-fx-background-color: linear-gradient(from %.0f%% %.0f%% to %.0f%% %.0f%%, %s, %s);",
+                x1, y1, x2, y2,
+                toHex(gradientFrom),
+                toHex(gradientTo)));
+        }
+
         if (borderRadius >= 0) {
             css.append(String.format("-fx-background-radius: %.1f;", borderRadius));
             css.append(String.format("-fx-border-radius: %.1f;", borderRadius));
@@ -478,5 +532,12 @@ public class Modifier {
         if (!css.isEmpty()) {
             node.setStyle(css.toString());
         }
+    }
+
+    private static String toHex(Color color) {
+        return String.format("#%02x%02x%02x",
+            (int) (color.getRed() * 255),
+            (int) (color.getGreen() * 255),
+            (int) (color.getBlue() * 255));
     }
 }
