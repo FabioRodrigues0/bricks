@@ -4,6 +4,7 @@
 
 <p align="center">
   <a href="https://jitpack.io/#FabioRodrigues0/bricks"><img src="https://jitpack.io/v/FabioRodrigues0/bricks.svg" alt="Latest Version"></a>
+  <a href="https://jitci.com/gh/FabioRodrigues0/bricks"><img src="https://jitpack.io/v/FabioRodrigues0/bricks.svg" alt="Latest Version"></a>
   <a href="https://github.com/FabioRodrigues0/bricks/blob/master/LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"></a>
   <a href="https://fabiorodrigues0.github.io/bricks/javadoc/"><img src="https://img.shields.io/badge/Javadoc-API-orange.svg" alt="Javadoc"></a>
 </p>
