@@ -57,6 +57,10 @@ public class Card implements Component {
     private double width = -1;
     private double height = -1;
     private Color background = Color.WHITE;
+    // TODO: migrar para modifier(Modifier) quando Card suportar Modifier completo
+    private Color gradientFrom = null;
+    private Color gradientTo = null;
+    private double gradientAngle = 135;
     private double cornerRadius = 8;
     private Runnable onClick;
 
@@ -146,6 +150,48 @@ public class Card implements Component {
     }
 
     /**
+     * Define um gradiente linear como fundo do card.
+     * Direcao por defeito: 135 graus (diagonal superior-esquerda para inferior-direita).
+     *
+     * <pre>{@code
+     * new Card()
+     *     .backgroundGradient(Color.web("#6c3483"), Color.web("#1a5276"))
+     *     .children(...)
+     * }</pre>
+     *
+     * @param from cor inicial do gradiente
+     * @param to   cor final do gradiente
+     * @return este componente para encadeamento
+     */
+    public Card backgroundGradient(Color from, Color to) {
+        this.gradientFrom = from;
+        this.gradientTo = to;
+        this.gradientAngle = 135;
+        return this;
+    }
+
+    /**
+     * Define um gradiente linear como fundo do card com angulo personalizado.
+     *
+     * <pre>{@code
+     * new Card()
+     *     .backgroundGradient(Color.web("#6c3483"), Color.web("#1a5276"), 90)
+     *     .children(...)
+     * }</pre>
+     *
+     * @param from  cor inicial do gradiente
+     * @param to    cor final do gradiente
+     * @param angle angulo em graus (0 = esquerda para direita, 90 = cima para baixo, 135 = diagonal)
+     * @return este componente para encadeamento
+     */
+    public Card backgroundGradient(Color from, Color to, double angle) {
+        this.gradientFrom = from;
+        this.gradientTo = to;
+        this.gradientAngle = angle;
+        return this;
+    }
+
+    /**
      * Define o raio dos cantos arredondados.
      *
      * @param radius {@code double} — raio em pixels (ex: 4, 8, 12)
@@ -184,14 +230,28 @@ public class Card implements Component {
         VBox vbox = new VBox();
         vbox.getStyleClass().add("bricks-card");
 
-        String bg = String.format("#%02x%02x%02x",
-            (int) (background.getRed() * 255),
-            (int) (background.getGreen() * 255),
-            (int) (background.getBlue() * 255));
+        String bgValue;
+        if (gradientFrom != null && gradientTo != null) {
+            double rad = Math.toRadians(gradientAngle);
+            double x1 = 50 - 50 * Math.sin(rad);
+            double y1 = 50 - 50 * Math.cos(rad);
+            double x2 = 50 + 50 * Math.sin(rad);
+            double y2 = 50 + 50 * Math.cos(rad);
+            bgValue = String.format(java.util.Locale.US,
+                "linear-gradient(from %.0f%% %.0f%% to %.0f%% %.0f%%, #%02x%02x%02x, #%02x%02x%02x)",
+                x1, y1, x2, y2,
+                (int) (gradientFrom.getRed() * 255), (int) (gradientFrom.getGreen() * 255), (int) (gradientFrom.getBlue() * 255),
+                (int) (gradientTo.getRed() * 255), (int) (gradientTo.getGreen() * 255), (int) (gradientTo.getBlue() * 255));
+        } else {
+            bgValue = String.format("#%02x%02x%02x",
+                (int) (background.getRed() * 255),
+                (int) (background.getGreen() * 255),
+                (int) (background.getBlue() * 255));
+        }
 
-        vbox.setStyle(String.format(
+        vbox.setStyle(String.format(java.util.Locale.US,
             "-fx-background-color: %s; -fx-background-radius: %.1f; -fx-border-radius: %.1f; -fx-padding: %.1f;",
-            bg, cornerRadius, cornerRadius, padding));
+            bgValue, cornerRadius, cornerRadius, padding));
 
         if (width >= 0) {
             vbox.setPrefWidth(width);
