@@ -3,15 +3,14 @@ package fabiorodrigues.bricks.components;
 import fabiorodrigues.bricks.core.Component;
 import fabiorodrigues.bricks.core.StateList;
 import fabiorodrigues.bricks.style.Modifier;
+import java.util.List;
+import java.util.function.Function;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-
-import java.util.List;
-import java.util.function.Function;
 
 /**
  * Lista virtualizada de alto desempenho com {@link ListView} JavaFX.
@@ -169,8 +168,8 @@ public class LazyColumn<T> implements Component {
         listView.getItems().addAll(lista);
         listView.setStyle(
             "-fx-background-color: transparent;" +
-            "-fx-border-color: transparent;" +
-            "-fx-padding: 0;"
+                "-fx-border-color: transparent;" +
+                "-fx-padding: 0;"
         );
 
         if (itemHeight > 0) {
@@ -178,28 +177,35 @@ public class LazyColumn<T> implements Component {
         }
 
         double halfGap = gap / 2;
-        listView.setCellFactory(lv -> new ListCell<>() {
-            @Override
-            protected void updateItem(T item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setGraphic(null);
-                    setStyle("-fx-background-color: transparent; -fx-padding: 0;");
-                } else {
-                    setGraphic(itemTemplate.apply(item).render());
-                    setStyle(String.format(
-                        "-fx-background-color: transparent; -fx-padding: %.1f 0 %.1f 0;",
-                        halfGap, halfGap
-                    ));
+        listView.setCellFactory(lv ->
+            new ListCell<>() {
+                @Override
+                protected void updateItem(T item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setGraphic(null);
+                        setStyle("-fx-background-color: transparent; -fx-padding: 0;");
+                    } else {
+                        setGraphic(itemTemplate.apply(item).render());
+                        setStyle(
+                            String.format(
+                                "-fx-background-color: transparent; -fx-padding: %.1f 0 %.1f 0;",
+                                halfGap,
+                                halfGap
+                            )
+                        );
+                    }
                 }
             }
-        });
+        );
+
+        VBox wrapper = new VBox();
 
         if (modifier != null) {
             modifier.applyTo(listView);
+            modifier.applyTo(wrapper);
         }
 
-        VBox wrapper = new VBox();
         wrapper.setPadding(new Insets(padding));
         wrapper.getChildren().add(listView);
         VBox.setVgrow(listView, Priority.ALWAYS);
