@@ -67,6 +67,18 @@ public abstract class BricksViewModel {
     }
 
     /**
+     * Cria um ScrollState para preservar a posicao do scroll de um LazyColumn
+     * entre re-renders. Equivalente ao rememberScrollState() do Jetpack Compose.
+     *
+     * <pre>{@code
+     * private final ScrollState scrollState = rememberScrollState();
+     * }</pre>
+     */
+    protected ScrollState rememberScrollState() {
+        return new ScrollState();
+    }
+
+    /**
      * Cria um StateList ligado ao re-render da app.
      * Quando a lista muda, a UI atualiza automaticamente.
      *

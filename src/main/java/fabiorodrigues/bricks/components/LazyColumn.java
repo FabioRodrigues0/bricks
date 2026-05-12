@@ -1,10 +1,12 @@
 package fabiorodrigues.bricks.components;
 
 import fabiorodrigues.bricks.core.Component;
+import fabiorodrigues.bricks.core.ScrollState;
 import fabiorodrigues.bricks.core.StateList;
 import fabiorodrigues.bricks.style.Modifier;
 import java.util.List;
 import java.util.function.Function;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
@@ -52,6 +54,7 @@ public class LazyColumn<T> implements Component {
     private double itemHeight = -1;
     private int buffer = 5;
     private Modifier modifier;
+    private ScrollState scrollState = null;
 
     /**
      * Define o espaço entre itens.
@@ -155,6 +158,26 @@ public class LazyColumn<T> implements Component {
         return this;
     }
 
+    /**
+     * Define um ScrollState para preservar a posicao do scroll entre re-renders.
+     * Criar com {@code rememberScrollState()} no BricksScene ou BricksViewModel.
+     *
+     * <pre>{@code
+     * private final ScrollState scroll = rememberScrollState();
+     *
+     * new LazyColumn<Item>()
+     *     .scrollState(scroll)
+     *     .items(lista)
+     * }</pre>
+     *
+     * @param scrollState o estado de scroll a preservar
+     * @return este componente para encadeamento
+     */
+    public LazyColumn<T> scrollState(ScrollState scrollState) {
+        this.scrollState = scrollState;
+        return this;
+    }
+
     @Override
     public Node render() {
         List<T> lista = stateItems != null ? stateItems.get() : items;
@@ -166,6 +189,36 @@ public class LazyColumn<T> implements Component {
         ListView<T> listView = new ListView<>();
         listView.getStyleClass().add("bricks-lazy-column");
         listView.getItems().addAll(lista);
+
+        if (scrollState != null && scrollState.getPosition() > 0) {
+            final double pos = scrollState.getPosition();
+            Platform.runLater(() -> listView.scrollTo((int) pos));
+        }
+
+        if (scrollState != null) {
+            listView.skinProperty().addListener((obs, oldSkin, newSkin) -> {
+                if (newSkin != null) {
+                    listView.addEventFilter(
+                        javafx.scene.input.ScrollEvent.SCROLL,
+                        e -> Platform.runLater(() -> {
+                            javafx.scene.control.ScrollBar scrollBar = null;
+                            for (javafx.scene.Node node : listView.lookupAll(".scroll-bar")) {
+                                if (node instanceof javafx.scene.control.ScrollBar sb) {
+                                    if (sb.getOrientation() == javafx.geometry.Orientation.VERTICAL) {
+                                        scrollBar = sb;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (scrollBar != null) {
+                                scrollState.setPosition(scrollBar.getValue() * lista.size());
+                            }
+                        })
+                    );
+                }
+            });
+        }
+
         listView.setStyle(
             "-fx-background-color: transparent;" +
                 "-fx-border-color: transparent;" +
