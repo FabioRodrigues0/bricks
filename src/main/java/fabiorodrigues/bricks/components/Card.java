@@ -57,7 +57,7 @@ public class Card implements Component {
     private double width = -1;
     private double height = -1;
     private Color background = Color.WHITE;
-    // TODO: migrar para modifier(Modifier) quando Card suportar Modifier completo
+    private Modifier modifier;
     private Color gradientFrom = null;
     private Color gradientTo = null;
     private double gradientAngle = 135;
@@ -203,6 +203,18 @@ public class Card implements Component {
     }
 
     /**
+     * Aplica um {@link Modifier} com propriedades visuais reutilizaveis.
+     * As propriedades do modifier sobrepõem-se às do card onde houver conflito.
+     *
+     * @param modifier o modifier a aplicar
+     * @return este componente para encadeamento
+     */
+    public Card modifier(Modifier modifier) {
+        this.modifier = modifier;
+        return this;
+    }
+
+    /**
      * Define um callback chamado ao clicar no card.
      * Quando definido, o cursor muda para mão ao passar por cima.
      *
@@ -252,6 +264,10 @@ public class Card implements Component {
         vbox.setStyle(String.format(java.util.Locale.US,
             "-fx-background-color: %s; -fx-background-radius: %.1f; -fx-border-radius: %.1f; -fx-padding: %.1f;",
             bgValue, cornerRadius, cornerRadius, padding));
+
+        if (modifier != null) {
+            modifier.applyTo(vbox);
+        }
 
         if (width >= 0) {
             vbox.setPrefWidth(width);
