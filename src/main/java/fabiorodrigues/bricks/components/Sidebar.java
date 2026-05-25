@@ -27,6 +27,7 @@ import javafx.scene.layout.VBox;
 public class Sidebar implements Component {
 
     private String logoPath = null;
+    private Component logoComponent = null;
     private final List<SidebarItem> items = new ArrayList<>();
     private Modifier modifier;
     private State<Boolean> sidebarAberta;
@@ -46,6 +47,19 @@ public class Sidebar implements Component {
      */
     public Sidebar logo(String imagePath) {
         this.logoPath = imagePath;
+        this.logoComponent = null;
+        return this;
+    }
+
+    /**
+     * Define um componente customizado a mostrar no topo da sidebar quando expandida.
+     *
+     * @param component componente a usar como logo
+     * @return este componente para encadeamento
+     */
+    public Sidebar logo(Component component) {
+        this.logoComponent = component;
+        this.logoPath = null;
         return this;
     }
 
@@ -85,8 +99,10 @@ public class Sidebar implements Component {
             .background(cs.surfaceContainer())
         );
 
-        if (logoPath != null && aberta) {
-            Node logoNode = new Image(logoPath).width(largura - 32).render();
+        if ((logoPath != null || logoComponent != null) && aberta) {
+            Node logoNode = logoComponent != null
+                ? logoComponent.render()
+                : new Image(logoPath).width(largura - 32).render();
             VBox.setMargin(logoNode, new Insets(16, 16, 8, 16));
             col.children(() -> logoNode);
             col.children(new Divider());

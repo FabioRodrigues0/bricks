@@ -27,6 +27,7 @@ public class Image implements Component {
     private double width = -1;
     private double height = -1;
     private boolean preserveRatio = true;
+    private Boolean backgroundLoading;
     private Modifier modifier;
 
     /**
@@ -84,6 +85,20 @@ public class Image implements Component {
     }
 
     /**
+     * Define se a imagem deve carregar em background.
+     *
+     * <p>Quando nao definido, apenas URLs remotos http/https carregam em background;
+     * recursos locais carregam de forma sincrona para evitar flicker.</p>
+     *
+     * @param backgroundLoading true para carregar em background
+     * @return este componente para encadeamento
+     */
+    public Image backgroundLoading(boolean backgroundLoading) {
+        this.backgroundLoading = backgroundLoading;
+        return this;
+    }
+
+    /**
      * Aplica um {@link Modifier} com propriedades visuais reutilizaveis.
      *
      * @param modifier o modifier a aplicar
@@ -96,11 +111,12 @@ public class Image implements Component {
 
     @Override
     public Node render() {
-        String resolvedUrl = url.startsWith("/")
-            ? getClass().getResource(url).toExternalForm()
-            : url;
+        String resolvedUrl = resolveUrl();
+        boolean loadInBackground = backgroundLoading != null
+            ? backgroundLoading
+            : isRemoteUrl(url);
 
-        javafx.scene.image.Image img = new javafx.scene.image.Image(resolvedUrl, true);
+        javafx.scene.image.Image img = new javafx.scene.image.Image(resolvedUrl, loadInBackground);
         ImageView view = new ImageView(img);
         view.setPreserveRatio(preserveRatio);
 
@@ -108,5 +124,22 @@ public class Image implements Component {
         if (height >= 0) view.setFitHeight(height);
 
         return view;
+    }
+
+    private String resolveUrl() {
+        if (!url.startsWith("/")) {
+            return url;
+        }
+
+        java.net.URL resource = getClass().getResource(url);
+        if (resource == null) {
+            throw new IllegalArgumentException("Imagem nao encontrada no classpath: " + url);
+        }
+        return resource.toExternalForm();
+    }
+
+    private boolean isRemoteUrl(String value) {
+        String normalized = value.toLowerCase();
+        return normalized.startsWith("http://") || normalized.startsWith("https://");
     }
 }
