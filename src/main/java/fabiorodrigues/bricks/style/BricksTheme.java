@@ -825,7 +825,7 @@ public class BricksTheme {
         Typography t = typography;
         Shapes s = shapes;
 
-        return """
+        return layoutCss() + """
         .root {
             -fx-font-family: "%s";
             -fx-font-size: %.0fpx;
@@ -1097,6 +1097,67 @@ public class BricksTheme {
                 toHex(c.surfaceContainerHigh()),
                 s.extraSmall()
             );
+    }
+
+    private String layoutCss() {
+        ColorScheme c = colorScheme;
+        Shapes s = shapes;
+        Typography t = typography;
+        return String.format(java.util.Locale.US, """
+
+        /* ---- Sidebar ---- */
+        .bricks-sidebar-item {
+            -fx-background-color: transparent;
+            -fx-cursor: hand;
+            -fx-padding: 10 12 10 12;
+            -fx-background-radius: %.0f;
+            -fx-border-radius: %.0f;
+            -fx-text-fill: %s;
+            -fx-font-size: %.0fpx;
+        }
+        .bricks-sidebar-item:hover {
+            -fx-background-color: %s;
+        }
+
+        /* ---- Navbar ---- */
+        .bricks-navbar {
+            -fx-border-width: 0 0 1 0;
+            -fx-border-color: %s;
+            -fx-min-height: 52;
+        }
+        .bricks-navbar-item {
+            -fx-background-color: transparent;
+            -fx-cursor: hand;
+            -fx-background-radius: %.0f;
+            -fx-border-radius: %.0f;
+            -fx-text-fill: %s;
+        }
+        .bricks-navbar-item:hover {
+            -fx-background-color: %s;
+        }
+
+        /* ---- Icon button (toggle, etc) ---- */
+        .bricks-icon-button {
+            -fx-background-color: transparent;
+            -fx-cursor: hand;
+            -fx-background-radius: %.0f;
+            -fx-padding: 8;
+        }
+        .bricks-icon-button:hover {
+            -fx-background-color: %s;
+        }
+        """,
+            s.small(), s.small(),                    // sidebar-item radius
+            toHex(c.onSurface()),                    // sidebar-item text
+            t.bodyMedium(),                          // sidebar-item font-size
+            toHex(c.surfaceContainerHigh()),         // sidebar-item hover
+            toHex(c.outlineVariant()),               // navbar border
+            s.small(), s.small(),                    // navbar-item radius
+            toHex(c.onSurface()),                    // navbar-item text
+            toHex(c.surfaceContainerHigh()),         // navbar-item hover
+            s.small(),                               // icon-button radius
+            toHex(c.surfaceContainerHigh())          // icon-button hover
+        );
     }
 
     /**

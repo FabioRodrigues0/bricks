@@ -80,6 +80,20 @@ public abstract class BricksScene {
     }
 
     /**
+     * Dispara o re-render da aplicacao.
+     * Usar como callback do {@link fabiorodrigues.bricks.components.AppLayout#onToggle(Runnable)}.
+     *
+     * <pre>{@code
+     * new AppLayout()
+     *     .onToggle(this::rerender)
+     *     .sidebar(...)
+     * }</pre>
+     */
+    protected void rerender() {
+        javafx.application.Platform.runLater(app::rerender);
+    }
+
+    /**
      * Cria um ScrollState para preservar a posicao do scroll de um LazyColumn
      * entre re-renders. Equivalente ao rememberScrollState() do Jetpack Compose.
      *
