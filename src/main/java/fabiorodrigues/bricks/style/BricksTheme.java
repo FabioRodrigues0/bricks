@@ -1017,6 +1017,35 @@ public class BricksTheme {
             -fx-padding: 0 10 0 10;
             -fx-margin: 10;
         }
+
+        /* ---- Badge ---- */
+        .label.bricks-badge {
+            -fx-background-radius: 12px;
+            -fx-font-size: 11px;
+            -fx-font-weight: bold;
+            -fx-text-fill: white;
+            -fx-min-width: 20px;
+            -fx-alignment: center;
+        }
+        .label.bricks-badge-default {
+            -fx-background-color: #6b7280;
+        }
+        .label.bricks-badge-primary {
+            -fx-background-color: %s;
+        }
+        .label.bricks-badge-success {
+            -fx-background-color: #16a34a;
+        }
+        .label.bricks-badge-warning {
+            -fx-background-color: #d97706;
+            -fx-text-fill: #1a1a1a;
+        }
+        .label.bricks-badge-danger {
+            -fx-background-color: #dc2626;
+        }
+        .label.bricks-badge-info {
+            -fx-background-color: #2563eb;
+        }
         """.formatted(
                 // root
                 t.fontFamily(),
@@ -1095,7 +1124,9 @@ public class BricksTheme {
                 s.extraSmall(),
                 s.extraSmall(),
                 toHex(c.surfaceContainerHigh()),
-                s.extraSmall()
+                s.extraSmall(),
+                // badge
+                toHex(c.primary())
             );
     }
 
