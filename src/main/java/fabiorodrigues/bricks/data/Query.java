@@ -75,6 +75,9 @@ public class Query {
     private String createTableName;
     private final List<String[]> tableCols = new ArrayList<>();
 
+    // UNION — cada entry e [Query query, boolean isAll]
+    private final List<Object[]> unions = new ArrayList<>();
+
     Query(DbConfig config) {
         this.config = config;
     }
@@ -258,6 +261,46 @@ public class Query {
         return this;
     }
 
+    /**
+     * Adiciona um UNION com outra query — remove duplicados.
+     *
+     * <pre>{@code
+     * DB.query()
+     *     .select("id", "nome").from("tabela_a")
+     *     .union(
+     *         DB.query().select("id", "nome").from("tabela_b")
+     *     )
+     *     .execute(Classe.class);
+     * }</pre>
+     *
+     * @param other a query a unir
+     * @return esta query para encadeamento
+     */
+    public Query union(Query other) {
+        this.unions.add(new Object[]{other, false});
+        return this;
+    }
+
+    /**
+     * Adiciona um UNION ALL com outra query — mantem duplicados.
+     *
+     * <pre>{@code
+     * DB.query()
+     *     .select("id", "nome").from("tabela_a")
+     *     .unionAll(
+     *         DB.query().select("id", "nome").from("tabela_b")
+     *     )
+     *     .execute(Classe.class);
+     * }</pre>
+     *
+     * @param other a query a unir
+     * @return esta query para encadeamento
+     */
+    public Query unionAll(Query other) {
+        this.unions.add(new Object[]{other, true});
+        return this;
+    }
+
     // --- INSERT ---
 
     /**
@@ -418,7 +461,7 @@ public class Query {
     @SuppressWarnings("unchecked")
     public <T> List<T> execute(Class<T> type) {
         String sql = buildSelectSql();
-        List<Object> params = collectWhereParams();
+        List<Object> params = collectSelectParams();
 
         try (PreparedStatement ps = DB.getConnection().prepareStatement(sql)) {
             bindParams(ps, params);
@@ -443,7 +486,7 @@ public class Query {
      */
     public QueryResult executeRaw() {
         String sql = buildSelectSql();
-        List<Object> params = collectWhereParams();
+        List<Object> params = collectSelectParams();
 
         try (PreparedStatement ps = DB.getConnection().prepareStatement(sql)) {
             bindParams(ps, params);
@@ -525,6 +568,13 @@ public class Query {
         }
         if (limitVal >= 0) {
             sb.append(" ").append(config.limitSyntax(limitVal, offsetVal));
+        }
+
+        for (Object[] entry : unions) {
+            Query unionQuery = (Query) entry[0];
+            boolean isAll = (boolean) entry[1];
+            sb.append(isAll ? " UNION ALL " : " UNION ");
+            sb.append(unionQuery.buildSelectSql());
         }
         return sb.toString();
     }
@@ -609,6 +659,15 @@ public class Query {
     private List<Object> collectUpdateParams() {
         List<Object> params = new ArrayList<>(setVals.values());
         params.addAll(collectWhereParams());
+        return params;
+    }
+
+    private List<Object> collectSelectParams() {
+        List<Object> params = collectWhereParams();
+        for (Object[] entry : unions) {
+            Query unionQuery = (Query) entry[0];
+            params.addAll(unionQuery.collectSelectParams());
+        }
         return params;
     }
 
