@@ -4,6 +4,7 @@ import fabiorodrigues.bricks.core.Component;
 import fabiorodrigues.bricks.core.ScrollState;
 import fabiorodrigues.bricks.core.StateList;
 import fabiorodrigues.bricks.style.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import javafx.application.Platform;
@@ -11,7 +12,9 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 /**
@@ -53,6 +56,7 @@ public class LazyColumn<T> implements Component {
     private double padding = 0;
     private double itemHeight = -1;
     private int buffer = 5;
+    private int columns = 1;
     private Modifier modifier;
     private ScrollState scrollState = null;
 
@@ -148,6 +152,30 @@ public class LazyColumn<T> implements Component {
     }
 
     /**
+     * Define o número de colunas por linha (modo grelha).
+     * Default {@code 1} mantém o comportamento vertical clássico.
+     *
+     * <p>Exemplo — 2 colunas:</p>
+     * <pre>{@code
+     * new LazyColumn<Item>()
+     *     .columns(2)
+     *     .gap(12)
+     *     .items(lista)
+     *     .item(it -> new Card().children(new Text(it.getName())))
+     * }</pre>
+     *
+     * <p>Itens são distribuídos da esquerda para a direita, top-down.
+     * Última linha incompleta é alinhada à esquerda com espaço vazio à direita.</p>
+     *
+     * @param columns {@code int} — número de colunas (mínimo 1)
+     * @return este componente para encadeamento
+     */
+    public LazyColumn<T> columns(int columns) {
+        this.columns = Math.max(1, columns);
+        return this;
+    }
+
+    /**
      * Aplica um {@link Modifier} com propriedades visuais reutilizáveis.
      *
      * @param modifier {@code Modifier} — o modifier a aplicar
@@ -186,13 +214,16 @@ public class LazyColumn<T> implements Component {
             return emptyState != null ? emptyState.render() : new VBox();
         }
 
-        ListView<T> listView = new ListView<>();
+        final int cols = Math.max(1, columns);
+        List<List<T>> rows = chunk(lista, cols);
+
+        ListView<List<T>> listView = new ListView<>();
         listView.getStyleClass().add("bricks-lazy-column");
-        listView.getItems().addAll(lista);
+        listView.getItems().addAll(rows);
 
         if (scrollState != null && scrollState.getPosition() > 0) {
             final double pos = scrollState.getPosition();
-            Platform.runLater(() -> listView.scrollTo((int) pos));
+            Platform.runLater(() -> listView.scrollTo((int) (pos / cols)));
         }
 
         if (scrollState != null) {
@@ -230,16 +261,17 @@ public class LazyColumn<T> implements Component {
         }
 
         double halfGap = gap / 2;
+        double colGap = gap;
         listView.setCellFactory(lv ->
             new ListCell<>() {
                 @Override
-                protected void updateItem(T item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty || item == null) {
+                protected void updateItem(List<T> row, boolean empty) {
+                    super.updateItem(row, empty);
+                    if (empty || row == null) {
                         setGraphic(null);
                         setStyle("-fx-background-color: transparent; -fx-padding: 0;");
                     } else {
-                        setGraphic(itemTemplate.apply(item).render());
+                        setGraphic(buildRow(row, cols, colGap));
                         setStyle(
                             String.format(
                                 "-fx-background-color: transparent; -fx-padding: %.1f 0 %.1f 0;",
@@ -264,5 +296,34 @@ public class LazyColumn<T> implements Component {
         VBox.setVgrow(listView, Priority.ALWAYS);
 
         return wrapper;
+    }
+
+    private Node buildRow(List<T> row, int cols, double colGap) {
+        if (cols == 1) {
+            return itemTemplate.apply(row.get(0)).render();
+        }
+        HBox hbox = new HBox(colGap);
+        for (T item : row) {
+            Node node = itemTemplate.apply(item).render();
+            if (node instanceof Region region) {
+                region.setMaxWidth(Double.MAX_VALUE);
+            }
+            HBox.setHgrow(node, Priority.ALWAYS);
+            hbox.getChildren().add(node);
+        }
+        for (int i = row.size(); i < cols; i++) {
+            Region filler = new Region();
+            HBox.setHgrow(filler, Priority.ALWAYS);
+            hbox.getChildren().add(filler);
+        }
+        return hbox;
+    }
+
+    private static <E> List<List<E>> chunk(List<E> src, int size) {
+        List<List<E>> out = new ArrayList<>();
+        for (int i = 0; i < src.size(); i += size) {
+            out.add(new ArrayList<>(src.subList(i, Math.min(i + size, src.size()))));
+        }
+        return out;
     }
 }
