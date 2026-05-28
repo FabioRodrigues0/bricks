@@ -63,6 +63,9 @@ public class Card implements Component {
     private double gradientAngle = 135;
     private double cornerRadius = 8;
     private Runnable onClick;
+    private String coverImagePath = null;
+    private double coverImageHeight = 160;
+    private boolean coverImagePreserveRatio = false;
 
     /**
      * Define o espaço interno uniforme.
@@ -237,6 +240,40 @@ public class Card implements Component {
         return this;
     }
 
+    /**
+     * Define uma imagem de capa no topo do card, sem padding.
+     * A imagem vai ate as bordas do card respeitando o cornerRadius no topo.
+     * O conteudo dos children fica abaixo com o padding normal.
+     *
+     * <pre>{@code
+     * new Card()
+     *     .coverImage("/car.png", 160)
+     *     .padding(12)
+     *     .children(new Text("Ferrari 458").bold())
+     * }</pre>
+     *
+     * @param imagePath caminho da imagem (recurso no classpath ou URL)
+     * @param height    altura da imagem em pixels
+     * @return este componente para encadeamento
+     */
+    public Card coverImage(String imagePath, double height) {
+        this.coverImagePath = imagePath;
+        this.coverImageHeight = height;
+        return this;
+    }
+
+    /**
+     * Define se a imagem de capa preserva a proporcao original.
+     * Por defeito false — a imagem preenche toda a largura do card.
+     *
+     * @param preserve true para preservar proporcao
+     * @return este componente para encadeamento
+     */
+    public Card coverImagePreserveRatio(boolean preserve) {
+        this.coverImagePreserveRatio = preserve;
+        return this;
+    }
+
     @Override
     public Node render() {
         VBox vbox = new VBox();
@@ -261,9 +298,10 @@ public class Card implements Component {
                 (int) (background.getBlue() * 255));
         }
 
+        String paddingValue = coverImagePath != null ? "0" : String.format(java.util.Locale.US, "%.1f", padding);
         vbox.setStyle(String.format(java.util.Locale.US,
-            "-fx-background-color: %s; -fx-background-radius: %.1f; -fx-border-radius: %.1f; -fx-padding: %.1f;",
-            bgValue, cornerRadius, cornerRadius, padding));
+            "-fx-background-color: %s; -fx-background-radius: %.1f; -fx-border-radius: %.1f; -fx-padding: %s;",
+            bgValue, cornerRadius, cornerRadius, paddingValue));
 
         if (modifier != null) {
             modifier.applyTo(vbox);
@@ -293,8 +331,47 @@ public class Card implements Component {
             vbox.setOnMouseClicked(e -> onClick.run());
         }
 
-        for (Component child : children) {
-            vbox.getChildren().add(child.render());
+        if (coverImagePath != null) {
+            String resolvedUrl;
+            if (coverImagePath.startsWith("/")) {
+                java.net.URL resource = getClass().getResource(coverImagePath);
+                resolvedUrl = resource != null ? resource.toExternalForm() : coverImagePath;
+            } else {
+                resolvedUrl = coverImagePath;
+            }
+
+            javafx.scene.image.Image img = new javafx.scene.image.Image(resolvedUrl, false);
+            javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
+            imgView.setPreserveRatio(coverImagePreserveRatio);
+            imgView.setFitHeight(coverImageHeight);
+
+            javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+            clip.setArcWidth(cornerRadius * 2);
+            clip.setArcHeight(cornerRadius * 2);
+            imgView.layoutBoundsProperty().addListener((obs, old, bounds) -> {
+                clip.setWidth(bounds.getWidth());
+                clip.setHeight(bounds.getHeight() + cornerRadius);
+            });
+            imgView.setClip(clip);
+
+            if (!coverImagePreserveRatio) {
+                imgView.fitWidthProperty().bind(vbox.widthProperty());
+            }
+
+            vbox.getChildren().add(imgView);
+
+            if (!children.isEmpty()) {
+                VBox contentBox = new VBox(4);
+                contentBox.setPadding(new javafx.geometry.Insets(padding));
+                for (Component child : children) {
+                    contentBox.getChildren().add(child.render());
+                }
+                vbox.getChildren().add(contentBox);
+            }
+        } else {
+            for (Component child : children) {
+                vbox.getChildren().add(child.render());
+            }
         }
 
         boolean hasMargin = marginTop != 0 || marginRight != 0 || marginBottom != 0 || marginLeft != 0;
