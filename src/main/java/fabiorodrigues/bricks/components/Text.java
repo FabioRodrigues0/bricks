@@ -18,6 +18,7 @@ public class Text implements Component {
     private final String content;
     private Modifier modifier;
     private double fontSize = -1;
+    private boolean bold = false;
 
     /**
      * Cria um componente de texto com o conteudo dado.
@@ -36,6 +37,16 @@ public class Text implements Component {
      */
     public Text fontSize(double size) {
         this.fontSize = size;
+        return this;
+    }
+
+    /**
+     * Torna o texto a negrito como inline style (ganha sobre CSS herdado de containers como ListCell).
+     *
+     * @return este componente para encadeamento
+     */
+    public Text bold() {
+        this.bold = true;
         return this;
     }
 
@@ -60,11 +71,15 @@ public class Text implements Component {
             modifier.applyTo(label);
         }
 
-        // atalho fontSize como inline style — ganha sobre CSS do tema e sobre modifier
-        if (fontSize > 0) {
+        // atalhos como inline style — ganham sobre CSS do tema, modifier e containers como ListCell
+        if (fontSize > 0 || bold) {
             String existing = label.getStyle();
-            String addition = "-fx-font-size: " + fontSize + "px;";
-            label.setStyle(existing == null || existing.isBlank() ? addition : existing + " " + addition);
+            StringBuilder addition = new StringBuilder();
+            if (fontSize > 0) addition.append("-fx-font-size: ").append(fontSize).append("px; ");
+            if (bold) addition.append("-fx-font-weight: bold; ");
+            label.setStyle(existing == null || existing.isBlank()
+                ? addition.toString()
+                : existing + " " + addition);
         }
 
         return label;

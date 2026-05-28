@@ -495,8 +495,8 @@ public class Modifier {
         }
 
         if (borderRadius >= 0) {
-            css.append(String.format("-fx-background-radius: %.1f;", borderRadius));
-            css.append(String.format("-fx-border-radius: %.1f;", borderRadius));
+            css.append(String.format(java.util.Locale.US, "-fx-background-radius: %.1f;", borderRadius));
+            css.append(String.format(java.util.Locale.US, "-fx-border-radius: %.1f;", borderRadius));
         }
 
         if (borderColor != null && borderWidth >= 0) {
@@ -504,13 +504,13 @@ public class Modifier {
                 (int) (borderColor.getRed() * 255),
                 (int) (borderColor.getGreen() * 255),
                 (int) (borderColor.getBlue() * 255)));
-            css.append(String.format("-fx-border-width: %.1f;", borderWidth));
+            css.append(String.format(java.util.Locale.US, "-fx-border-width: %.1f;", borderWidth));
         }
 
         // propriedades de texto como inline CSS (ganha sobre stylesheets do tema)
         if (node instanceof Labeled) {
             if (fontSize > 0) {
-                css.append(String.format("-fx-font-size: %.1fpx;", fontSize));
+                css.append(String.format(java.util.Locale.US, "-fx-font-size: %.1fpx;", fontSize));
             }
             if (bold) {
                 css.append("-fx-font-weight: bold;");

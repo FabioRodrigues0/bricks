@@ -41,6 +41,7 @@ public class IconButton implements Component {
     private int size = 16;
     private Color color = null;
     private boolean danger = false;
+    private boolean ghost = false;
     private Runnable onClick;
     private String tooltip = null;
     private Modifier modifier;
@@ -98,6 +99,16 @@ public class IconButton implements Component {
     }
 
     /**
+     * Remove o estilo default do botao e aplica fundo transparente.
+     *
+     * @return este componente para encadeamento
+     */
+    public IconButton ghost() {
+        this.ghost = true;
+        return this;
+    }
+
+    /**
      * Define a acao ao clicar no botao.
      *
      * @param handler {@code Runnable} — acao a executar
@@ -141,6 +152,11 @@ public class IconButton implements Component {
 
         if (danger) {
             fxButton.getStyleClass().add("bricks-button-danger");
+        }
+
+        if (ghost) {
+            fxButton.getStyleClass().remove("bricks-button");
+            fxButton.setStyle("-fx-background-color: transparent;");
         }
 
         FontIcon icon = new FontIcon(iconCode);
