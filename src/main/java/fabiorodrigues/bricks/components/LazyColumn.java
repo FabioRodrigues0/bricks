@@ -128,8 +128,9 @@ public class LazyColumn<T> implements Component {
     }
 
     /**
-     * Define a altura fixa por item. Melhora a performance do scroll
-     * pois o ListView consegue calcular posições sem medir cada cell.
+     * Normaliza a altura de cada item (todos os items ficam com a mesma altura).
+     * Como bónus melhora a performance do scroll — o ListView consegue calcular
+     * posições sem medir cada cell.
      *
      * @param height {@code double} — altura em pixels (ex: 80, 120)
      * @return este componente para encadeamento

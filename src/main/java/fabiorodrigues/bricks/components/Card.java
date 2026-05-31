@@ -66,6 +66,8 @@ public class Card implements Component {
     private String coverImagePath = null;
     private double coverImageHeight = 160;
     private boolean coverImagePreserveRatio = false;
+    private String coverPlaceholderPath = null;
+    private Component coverPlaceholderComponent = null;
 
     /**
      * Define o espaço interno uniforme.
@@ -274,6 +276,45 @@ public class Card implements Component {
         return this;
     }
 
+    /**
+     * Define uma imagem de fallback quando o {@link #coverImage} falha a carregar.
+     *
+     * <pre>{@code
+     * new Card()
+     *     .coverImage("/car.png", 160)
+     *     .coverPlaceholder("/no-image.png")
+     * }</pre>
+     *
+     * @param imagePath caminho da imagem placeholder (recurso no classpath ou URL)
+     * @return este componente para encadeamento
+     */
+    public Card coverPlaceholder(String imagePath) {
+        this.coverPlaceholderPath = imagePath;
+        this.coverPlaceholderComponent = null;
+        return this;
+    }
+
+    /**
+     * Define um componente de fallback quando o {@link #coverImage} falha a carregar.
+     * Util para construir placeholders custom (icone, texto, gradiente, etc).
+     *
+     * <pre>{@code
+     * new Card()
+     *     .coverImage("/car.png", 160)
+     *     .coverPlaceholder(new Box()
+     *         .modifier(new Modifier().background(Color.LIGHTGRAY).alignment(Pos.CENTER))
+     *         .children(() -> new Icon("fas-image").size(48).render()))
+     * }</pre>
+     *
+     * @param component componente a renderizar como placeholder
+     * @return este componente para encadeamento
+     */
+    public Card coverPlaceholder(Component component) {
+        this.coverPlaceholderComponent = component;
+        this.coverPlaceholderPath = null;
+        return this;
+    }
+
     @Override
     public Node render() {
         VBox vbox = new VBox();
@@ -332,33 +373,15 @@ public class Card implements Component {
         }
 
         if (coverImagePath != null) {
-            String resolvedUrl;
-            if (coverImagePath.startsWith("/")) {
-                java.net.URL resource = getClass().getResource(coverImagePath);
-                resolvedUrl = resource != null ? resource.toExternalForm() : coverImagePath;
-            } else {
-                resolvedUrl = coverImagePath;
+            Node coverNode = buildCoverImage(coverImagePath, vbox);
+            if (coverNode == null) {
+                if (coverPlaceholderComponent != null) {
+                    coverNode = buildCoverFromComponent(coverPlaceholderComponent.render());
+                } else if (coverPlaceholderPath != null) {
+                    coverNode = buildCoverImage(coverPlaceholderPath, vbox);
+                }
             }
-
-            javafx.scene.image.Image img = new javafx.scene.image.Image(resolvedUrl, false);
-            javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
-            imgView.setPreserveRatio(coverImagePreserveRatio);
-            imgView.setFitHeight(coverImageHeight);
-
-            javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
-            clip.setArcWidth(cornerRadius * 2);
-            clip.setArcHeight(cornerRadius * 2);
-            imgView.layoutBoundsProperty().addListener((obs, old, bounds) -> {
-                clip.setWidth(bounds.getWidth());
-                clip.setHeight(bounds.getHeight() + cornerRadius);
-            });
-            imgView.setClip(clip);
-
-            if (!coverImagePreserveRatio) {
-                imgView.fitWidthProperty().bind(vbox.widthProperty());
-            }
-
-            vbox.getChildren().add(imgView);
+            if (coverNode != null) vbox.getChildren().add(coverNode);
 
             if (!children.isEmpty()) {
                 VBox contentBox = new VBox(4);
@@ -383,5 +406,54 @@ public class Card implements Component {
         }
 
         return vbox;
+    }
+
+    private Node buildCoverImage(String path, VBox vbox) {
+        String resolvedUrl;
+        if (path.startsWith("/")) {
+            java.net.URL resource = getClass().getResource(path);
+            if (resource == null) return null;
+            resolvedUrl = resource.toExternalForm();
+        } else {
+            resolvedUrl = path;
+        }
+
+        javafx.scene.image.Image img;
+        try {
+            img = new javafx.scene.image.Image(resolvedUrl, false);
+        } catch (Exception e) {
+            return null;
+        }
+        if (img.isError() || img.getException() != null) return null;
+
+        javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
+        imgView.setPreserveRatio(coverImagePreserveRatio);
+        imgView.setFitHeight(coverImageHeight);
+        applyCoverClip(imgView);
+
+        if (!coverImagePreserveRatio) {
+            imgView.fitWidthProperty().bind(vbox.widthProperty());
+        }
+        return imgView;
+    }
+
+    private Node buildCoverFromComponent(Node node) {
+        javafx.scene.layout.StackPane wrapper = new javafx.scene.layout.StackPane(node);
+        wrapper.setMinHeight(coverImageHeight);
+        wrapper.setPrefHeight(coverImageHeight);
+        wrapper.setMaxHeight(coverImageHeight);
+        applyCoverClip(wrapper);
+        return wrapper;
+    }
+
+    private void applyCoverClip(Node target) {
+        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+        clip.setArcWidth(cornerRadius * 2);
+        clip.setArcHeight(cornerRadius * 2);
+        target.layoutBoundsProperty().addListener((obs, old, bounds) -> {
+            clip.setWidth(bounds.getWidth());
+            clip.setHeight(bounds.getHeight() + cornerRadius);
+        });
+        target.setClip(clip);
     }
 }
