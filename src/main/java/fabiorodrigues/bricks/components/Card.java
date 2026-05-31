@@ -339,7 +339,10 @@ public class Card implements Component {
                 (int) (background.getBlue() * 255));
         }
 
-        String paddingValue = coverImagePath != null ? "0" : String.format(java.util.Locale.US, "%.1f", padding);
+        boolean hasCoverSlot = coverImagePath != null
+            || coverPlaceholderComponent != null
+            || coverPlaceholderPath != null;
+        String paddingValue = hasCoverSlot ? "0" : String.format(java.util.Locale.US, "%.1f", padding);
         vbox.setStyle(String.format(java.util.Locale.US,
             "-fx-background-color: %s; -fx-background-radius: %.1f; -fx-border-radius: %.1f; -fx-padding: %s;",
             bgValue, cornerRadius, cornerRadius, paddingValue));
@@ -372,7 +375,7 @@ public class Card implements Component {
             vbox.setOnMouseClicked(e -> onClick.run());
         }
 
-        if (coverImagePath != null) {
+        if (hasCoverSlot) {
             Node coverNode = buildCoverImage(coverImagePath, vbox);
             if (coverNode == null) {
                 if (coverPlaceholderComponent != null) {
@@ -409,14 +412,8 @@ public class Card implements Component {
     }
 
     private Node buildCoverImage(String path, VBox vbox) {
-        String resolvedUrl;
-        if (path.startsWith("/")) {
-            java.net.URL resource = getClass().getResource(path);
-            if (resource == null) return null;
-            resolvedUrl = resource.toExternalForm();
-        } else {
-            resolvedUrl = path;
-        }
+        String resolvedUrl = resolveCoverImageUrl(path);
+        if (resolvedUrl == null) return null;
 
         javafx.scene.image.Image img;
         try {
@@ -435,6 +432,23 @@ public class Card implements Component {
             imgView.fitWidthProperty().bind(vbox.widthProperty());
         }
         return imgView;
+    }
+
+    private String resolveCoverImageUrl(String path) {
+        if (path == null || path.isBlank()) return null;
+
+        java.io.File file = new java.io.File(path);
+        if (file.exists() && file.isFile()) {
+            return file.toURI().toString();
+        }
+
+        if (path.startsWith("/")) {
+            java.net.URL resource = getClass().getResource(path);
+            if (resource == null) return null;
+            return resource.toExternalForm();
+        }
+
+        return path;
     }
 
     private Node buildCoverFromComponent(Node node) {
