@@ -45,7 +45,9 @@ public class TextField implements Component {
      */
     public enum Type {
         TEXT,
-        NUMBER
+        NUMBER,
+        FLOAT,
+        DOUBLE
     }
 
     private String value = "";
@@ -56,7 +58,7 @@ public class TextField implements Component {
     private boolean wrapText = true;
     private Modifier modifier;
     private Consumer<String> onChange;
-    private State<String> boundState;
+    private State<?> boundState;
     private TextInputControl control;
 
     private boolean autoFocus = false;
@@ -164,8 +166,8 @@ public class TextField implements Component {
     /**
      * Define o tipo de input aceite pelo campo.
      *
-     * <p>{@link Type#NUMBER} aceita numeros inteiros ou decimais, com sinal
-     * negativo opcional. O separador decimal pode ser ponto ou virgula.</p>
+     * <p>{@link Type#NUMBER} aceita apenas numeros inteiros, com sinal negativo
+     * opcional. Para valores decimais, usar {@link Type#FLOAT} ou {@link Type#DOUBLE}.</p>
      *
      * <pre>{@code
      * new TextField().type(TextField.Type.NUMBER)
@@ -186,6 +188,42 @@ public class TextField implements Component {
      */
     public TextField number() {
         return type(Type.NUMBER);
+    }
+
+    /**
+     * Atalho para {@code type(TextField.Type.FLOAT)}.
+     *
+     * @return este componente para encadeamento
+     */
+    public TextField floating() {
+        return type(Type.FLOAT);
+    }
+
+    /**
+     * Atalho para {@code type(TextField.Type.FLOAT)}.
+     *
+     * @return este componente para encadeamento
+     */
+    public TextField floatNumber() {
+        return floating();
+    }
+
+    /**
+     * Atalho para {@code type(TextField.Type.DOUBLE)}.
+     *
+     * @return este componente para encadeamento
+     */
+    public TextField decimal() {
+        return type(Type.DOUBLE);
+    }
+
+    /**
+     * Atalho para {@code type(TextField.Type.DOUBLE)}.
+     *
+     * @return este componente para encadeamento
+     */
+    public TextField doubleNumber() {
+        return decimal();
     }
 
     /**
@@ -221,13 +259,15 @@ public class TextField implements Component {
      *
      * <pre>{@code
      * State<String> username = state("");
+     * State<Integer> idade = state(18);
      * new TextField().label("Username:").bindTo(username);
+     * new TextField().number().bindTo(idade);
      * }</pre>
      *
      * @param state o state a ligar
      * @return este componente para encadeamento
      */
-    public TextField bindTo(State<String> state) {
+    public <T> TextField bindTo(State<T> state) {
         this.boundState = state;
         return this;
     }
@@ -265,7 +305,9 @@ public class TextField implements Component {
 
     @Override
     public Node render() {
-        String initialValue = boundState != null ? boundState.get() : value;
+        String initialValue = boundState != null && boundState.get() != null
+            ? boundState.get().toString()
+            : value;
 
         if (isMultiline) {
             javafx.scene.control.TextArea area = new javafx.scene.control.TextArea(initialValue);
@@ -335,7 +377,7 @@ public class TextField implements Component {
         if (boundState != null) {
             control
                 .textProperty()
-                .addListener((obs, oldVal, newVal) -> boundState.setQuietly(newVal));
+                .addListener((obs, oldVal, newVal) -> updateBoundState(newVal));
         }
 
         if (onChange != null) {
@@ -358,8 +400,84 @@ public class TextField implements Component {
 
     private String inputPatternForType() {
         if (type == Type.NUMBER) {
+            return "-?\\d*";
+        }
+        if (type == Type.FLOAT || type == Type.DOUBLE) {
             return "-?\\d*([\\.,]\\d*)?";
         }
         return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void updateBoundState(String text) {
+        if (boundState == null) return;
+        State<T> state = (State<T>) boundState;
+        state.setQuietly((T) valueForState(text, state.get()));
+    }
+
+    private Object valueForState(String text, Object currentValue) {
+        if (shouldBindAsInteger(currentValue)) {
+            return parseInteger(text);
+        }
+        if (shouldBindAsFloat(currentValue)) {
+            return parseFloat(text);
+        }
+        if (shouldBindAsDouble(currentValue)) {
+            return parseDouble(text);
+        }
+        return text;
+    }
+
+    private boolean shouldBindAsInteger(Object currentValue) {
+        return currentValue instanceof Integer || (currentValue == null && type == Type.NUMBER);
+    }
+
+    private boolean shouldBindAsFloat(Object currentValue) {
+        return currentValue instanceof Float || (currentValue == null && type == Type.FLOAT);
+    }
+
+    private boolean shouldBindAsDouble(Object currentValue) {
+        return currentValue instanceof Double || (currentValue == null && type == Type.DOUBLE);
+    }
+
+    private Integer parseInteger(String text) {
+        if (text == null || text.isBlank() || "-".equals(text)) return null;
+        try {
+            return Integer.valueOf(text);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private Float parseFloat(String text) {
+        if (isPartialDecimal(text)) return null;
+        try {
+            return Float.valueOf(normalizeDecimal(text));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private Double parseDouble(String text) {
+        if (isPartialDecimal(text)) return null;
+        try {
+            return Double.valueOf(normalizeDecimal(text));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private boolean isPartialDecimal(String text) {
+        return text == null
+            || text.isBlank()
+            || "-".equals(text)
+            || ".".equals(text)
+            || ",".equals(text)
+            || "-.".equals(text)
+            || "-,".equals(text);
+    }
+
+    private String normalizeDecimal(String text) {
+        return text.replace(',', '.');
     }
 }
