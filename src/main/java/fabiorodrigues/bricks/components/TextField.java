@@ -40,6 +40,14 @@ import javafx.scene.layout.VBox;
  */
 public class TextField implements Component {
 
+    /**
+     * Tipo de input aceite pelo campo.
+     */
+    public enum Type {
+        TEXT,
+        NUMBER
+    }
+
     private String value = "";
     private String label = null;
     private String placeholder = "";
@@ -54,6 +62,7 @@ public class TextField implements Component {
     private boolean autoFocus = false;
     private boolean hideCursor = false;
     private String inputFilter = null;
+    private Type type = Type.TEXT;
     private Consumer<KeyEvent> onKeyPressed = null;
 
     /**
@@ -153,6 +162,33 @@ public class TextField implements Component {
     }
 
     /**
+     * Define o tipo de input aceite pelo campo.
+     *
+     * <p>{@link Type#NUMBER} aceita numeros inteiros ou decimais, com sinal
+     * negativo opcional. O separador decimal pode ser ponto ou virgula.</p>
+     *
+     * <pre>{@code
+     * new TextField().type(TextField.Type.NUMBER)
+     * }</pre>
+     *
+     * @param type tipo de input do campo
+     * @return este componente para encadeamento
+     */
+    public TextField type(Type type) {
+        this.type = type != null ? type : Type.TEXT;
+        return this;
+    }
+
+    /**
+     * Atalho para {@code type(TextField.Type.NUMBER)}.
+     *
+     * @return este componente para encadeamento
+     */
+    public TextField number() {
+        return type(Type.NUMBER);
+    }
+
+    /**
      * Filtra o input aceite pelo campo. Apenas caracteres que correspondam
      * ao regex sao aceites — os restantes sao ignorados silenciosamente.
      *
@@ -245,12 +281,20 @@ public class TextField implements Component {
             control = field;
         }
 
-        // Filtro de input — apenas aceita caracteres que correspondam ao regex
-        if (inputFilter != null) {
-            final String pattern = inputFilter;
+        // Filtro de input — aceita o filtro manual ou o tipo predefinido.
+        String pattern = inputFilter != null ? inputFilter : inputPatternForType();
+        if (pattern != null) {
+            final String finalPattern = pattern;
+            final boolean fullValuePattern = inputFilter == null;
             control.setTextFormatter(
                 new TextFormatter<>(change -> {
-                    if (change.getText().matches(pattern + "*")) return change;
+                    String textToValidate = fullValuePattern
+                        ? change.getControlNewText()
+                        : change.getText();
+                    String patternToMatch = fullValuePattern
+                        ? finalPattern
+                        : finalPattern + "*";
+                    if (textToValidate.matches(patternToMatch)) return change;
                     return null;
                 })
             );
@@ -310,5 +354,12 @@ public class TextField implements Component {
         }
 
         return control;
+    }
+
+    private String inputPatternForType() {
+        if (type == Type.NUMBER) {
+            return "-?\\d*([\\.,]\\d*)?";
+        }
+        return null;
     }
 }

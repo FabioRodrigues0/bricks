@@ -98,4 +98,26 @@ class TextFieldTest {
         campo.render();
         assertEquals("inicial", campo.getValue());
     }
+
+    @Test
+    void deveAceitarNumerosQuandoTipoNumber() {
+        javafx.scene.control.TextField field = (javafx.scene.control.TextField) new TextField()
+            .type(TextField.Type.NUMBER)
+            .render();
+
+        field.setText("-12.5");
+
+        assertEquals("-12.5", field.getText());
+    }
+
+    @Test
+    void deveRejeitarTextoQuandoTipoNumber() {
+        javafx.scene.control.TextField field = (javafx.scene.control.TextField) new TextField()
+            .number()
+            .render();
+
+        field.setText("abc");
+
+        assertEquals("", field.getText());
+    }
 }

@@ -3,9 +3,13 @@ package fabiorodrigues.bricks.components;
 import fabiorodrigues.bricks.core.BricksApplication;
 import fabiorodrigues.bricks.core.Component;
 import javafx.scene.Scene;
+import javafx.scene.Node;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.Effect;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 /**
  * Janela modal bloqueante. Herda o tema da app principal.
@@ -65,9 +69,53 @@ public class Modal {
      */
     public static void show(BricksApplication app, String title,
                             double width, double height, ModalContent content) {
+        show(app, title, width, height, true, content);
+    }
+
+    /**
+     * Abre um modal sem a barra nativa da janela (minimizar, maximizar, fechar).
+     *
+     * @param app     a aplicacao Bricks atual
+     * @param content lambda que recebe o Stage e devolve o Component a mostrar
+     */
+    public static void showUndecorated(BricksApplication app, ModalContent content) {
+        showUndecorated(app, null, 400, 300, content);
+    }
+
+    /**
+     * Abre um modal sem a barra nativa da janela (minimizar, maximizar, fechar).
+     *
+     * @param app     a aplicacao Bricks atual
+     * @param title   titulo da janela modal (fica disponivel no Stage, mas nao aparece sem decoracao)
+     * @param content lambda que recebe o Stage e devolve o Component a mostrar
+     */
+    public static void showUndecorated(BricksApplication app, String title, ModalContent content) {
+        showUndecorated(app, title, 400, 300, content);
+    }
+
+    /**
+     * Abre um modal sem a barra nativa da janela (minimizar, maximizar, fechar)
+     * e com tamanho custom.
+     *
+     * @param app     a aplicacao Bricks atual
+     * @param title   titulo da janela modal (fica disponivel no Stage, mas nao aparece sem decoracao)
+     * @param width   largura da janela em pixels
+     * @param height  altura da janela em pixels
+     * @param content lambda que recebe o Stage e devolve o Component a mostrar
+     */
+    public static void showUndecorated(BricksApplication app, String title,
+                                       double width, double height, ModalContent content) {
+        show(app, title, width, height, false, content);
+    }
+
+    private static void show(BricksApplication app, String title,
+                             double width, double height, boolean decorated, ModalContent content) {
         Stage modal = new Stage();
         modal.initModality(Modality.APPLICATION_MODAL);
         modal.initOwner(app.getStage());
+        if (!decorated) {
+            modal.initStyle(StageStyle.UNDECORATED);
+        }
 
         if (title != null) {
             modal.setTitle(title);
@@ -75,8 +123,10 @@ public class Modal {
 
         StackPane root = new StackPane(content.build(modal).render());
         root.setPadding(new javafx.geometry.Insets(16));
+        root.setPrefSize(width, height);
 
         Scene scene = new Scene(root, width, height);
+        applyBackdrop(app, modal);
 
         if (app.getStage().getScene() != null) {
             scene.getStylesheets().addAll(
@@ -89,6 +139,26 @@ public class Modal {
         });
 
         modal.setScene(scene);
+        modal.setResizable(false);
+        modal.sizeToScene();
+        modal.centerOnScreen();
         modal.show();
+    }
+
+    private static void applyBackdrop(BricksApplication app, Stage modal) {
+        if (app.getStage() == null || app.getStage().getScene() == null) {
+            return;
+        }
+
+        Node ownerRoot = app.getStage().getScene().getRoot();
+        Effect previousEffect = ownerRoot.getEffect();
+
+        ColorAdjust dimEffect = new ColorAdjust();
+        dimEffect.setBrightness(-0.45);
+        dimEffect.setSaturation(-0.15);
+        dimEffect.setInput(previousEffect);
+
+        ownerRoot.setEffect(dimEffect);
+        modal.setOnHidden(event -> ownerRoot.setEffect(previousEffect));
     }
 }
