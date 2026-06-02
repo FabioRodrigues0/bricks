@@ -1046,6 +1046,101 @@ public class BricksTheme {
         .label.bricks-badge-info {
             -fx-background-color: #2563eb;
         }
+
+        /* ---- DatePicker ---- */
+        .date-picker.bricks-date-picker {
+            -fx-pref-width: 200px;
+            -fx-background-color: %s;
+            -fx-border-color: %s;
+            -fx-border-width: 1;
+            -fx-border-radius: %.0f;
+            -fx-background-radius: %.0f;
+            -fx-font-size: %.0fpx;
+        }
+        .date-picker.bricks-date-picker:focused {
+            -fx-border-color: %s;
+            -fx-border-width: 2;
+        }
+        .date-picker.bricks-date-picker .text-field {
+            -fx-background-color: %s;
+            -fx-text-fill: %s;
+            -fx-prompt-text-fill: %s;
+        }
+
+        /* ---- Calendar ---- */
+        .bricks-calendar {
+            -fx-background-color: %s;
+            -fx-background-radius: %.0f;
+            -fx-padding: 12px;
+        }
+        .button.bricks-calendar-header {
+            -fx-background-color: transparent;
+            -fx-text-fill: %s;
+            -fx-font-weight: bold;
+            -fx-font-size: 14px;
+            -fx-padding: 6 8 6 8;
+            -fx-cursor: hand;
+        }
+        .button.bricks-calendar-header:hover {
+            -fx-background-color: %s;
+        }
+        .button.bricks-calendar-nav {
+            -fx-background-color: transparent;
+            -fx-text-fill: %s;
+            -fx-font-size: 14px;
+            -fx-padding: 6 10 6 10;
+            -fx-cursor: hand;
+        }
+        .button.bricks-calendar-nav:hover {
+            -fx-background-color: %s;
+        }
+        .label.bricks-calendar-weekday {
+            -fx-text-fill: %s;
+            -fx-font-size: 12px;
+            -fx-font-weight: bold;
+        }
+        .button.bricks-calendar-day {
+            -fx-background-color: transparent;
+            -fx-text-fill: %s;
+            -fx-background-radius: 18px;
+            -fx-border-radius: 18px;
+            -fx-padding: 0;
+            -fx-cursor: hand;
+            -fx-font-size: 13px;
+            -fx-font-weight: normal;
+        }
+        .button.bricks-calendar-day:hover {
+            -fx-background-color: %s;
+        }
+        .button.bricks-calendar-day-other {
+            -fx-text-fill: %s;
+            -fx-opacity: 0.5;
+        }
+        .button.bricks-calendar-day-today {
+            -fx-border-color: %s;
+            -fx-border-radius: 18px;
+            -fx-border-width: 1.5px;
+        }
+        .button.bricks-calendar-day-selected {
+            -fx-background-color: %s;
+            -fx-text-fill: %s;
+        }
+        .button.bricks-calendar-month {
+            -fx-background-color: transparent;
+            -fx-text-fill: %s;
+            -fx-background-radius: %.0f;
+            -fx-border-radius: %.0f;
+            -fx-padding: 0;
+            -fx-cursor: hand;
+            -fx-font-weight: normal;
+        }
+        .button.bricks-calendar-month:hover {
+            -fx-background-color: %s;
+        }
+        .button.bricks-calendar-month-selected {
+            -fx-background-color: %s;
+            -fx-text-fill: %s;
+        }
         """.formatted(
                 // root
                 t.fontFamily(),
@@ -1126,7 +1221,37 @@ public class BricksTheme {
                 toHex(c.surfaceContainerHigh()),
                 s.extraSmall(),
                 // badge
-                toHex(c.primary())
+                toHex(c.primary()),
+                // date-picker
+                toHex(c.surface()),
+                toHex(c.outline()),
+                s.extraSmall(),
+                s.extraSmall(),
+                t.bodyLarge(),
+                toHex(c.primary()),
+                toHex(c.surface()),
+                toHex(c.onSurface()),
+                toHex(c.onSurfaceVariant()),
+                // calendar
+                toHex(c.surface()),
+                s.medium(),
+                toHex(c.onSurface()),
+                toHex(c.surfaceContainerHigh()),
+                toHex(c.onSurface()),
+                toHex(c.surfaceContainerHigh()),
+                toHex(c.onSurfaceVariant()),
+                toHex(c.onSurface()),
+                toHex(c.surfaceContainerHigh()),
+                toHex(c.onSurfaceVariant()),
+                toHex(c.primary()),
+                toHex(c.primary()),
+                toHex(c.onPrimary()),
+                toHex(c.onSurface()),
+                s.extraSmall(),
+                s.extraSmall(),
+                toHex(c.surfaceContainerHigh()),
+                toHex(c.primary()),
+                toHex(c.onPrimary())
             );
     }
 
