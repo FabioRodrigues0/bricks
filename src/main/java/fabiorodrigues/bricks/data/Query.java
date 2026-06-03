@@ -491,20 +491,65 @@ public class Query {
         try (PreparedStatement ps = DB.getConnection().prepareStatement(sql)) {
             bindParams(ps, params);
             try (ResultSet rs = ps.executeQuery()) {
-                ResultSetMetaData meta = rs.getMetaData();
-                int cols = meta.getColumnCount();
-                List<Map<String, Object>> rows = new ArrayList<>();
-                while (rs.next()) {
-                    Map<String, Object> row = new LinkedHashMap<>();
-                    for (int i = 1; i <= cols; i++) {
-                        row.put(meta.getColumnLabel(i), rs.getObject(i));
-                    }
-                    rows.add(row);
-                }
-                return new QueryResult(rows);
+                return new QueryResult(readRows(rs));
             }
         } catch (Exception e) {
             throw new RuntimeException("Erro ao executar SELECT: " + sql + " | " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Executa INSERT, UPDATE, DELETE ou CREATE TABLE e devolve um resultado detalhado.
+     * <ul>
+     *   <li>INSERT — inclui linhas afetadas, chaves geradas e, se possivel, a linha criada em {@link QueryResult#getRows()}</li>
+     *   <li>UPDATE / DELETE — inclui linhas afetadas</li>
+     *   <li>CREATE TABLE — inclui 0 linhas afetadas</li>
+     * </ul>
+     *
+     * <pre>{@code
+     * QueryResult result = DB.query()
+     *     .insertInto("alunos")
+     *     .values(Map.of("nome", "Fabio", "turma", 1))
+     *     .executeResult();
+     *
+     * int id = result.getGeneratedIdAsInt();
+     * Map<String, Object> aluno = result.first();
+     * }</pre>
+     *
+     * @return resultado detalhado da operacao
+     * @throws RuntimeException se ocorrer erro SQL
+     */
+    public QueryResult executeResult() {
+        return executeResult(true);
+    }
+
+    private QueryResult executeResult(boolean fetchInsertedRow) {
+        if (type == null) throw new IllegalStateException("Tipo de query nao definido.");
+
+        String sql;
+        List<Object> params;
+
+        switch (type) {
+            case INSERT -> { sql = buildInsertSql(); params = new ArrayList<>(insertVals.values()); }
+            case UPDATE -> { sql = buildUpdateSql(); params = collectUpdateParams(); }
+            case DELETE -> { sql = buildDeleteSql(); params = collectWhereParams(); }
+            case CREATE_TABLE -> { sql = buildCreateTableSql(); params = List.of(); }
+            default -> throw new IllegalStateException("executeResult() e apenas para INSERT/UPDATE/DELETE/CREATE TABLE");
+        }
+
+        try (PreparedStatement ps = DB.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            bindParams(ps, params);
+            int affectedRows = ps.executeUpdate();
+
+            List<Map<String, Object>> generatedKeys = readGeneratedKeys(ps);
+            Object generatedId = firstGeneratedId(generatedKeys);
+            List<Map<String, Object>> rows = type == Type.INSERT && fetchInsertedRow
+                ? fetchInsertedRow(generatedId)
+                : List.of();
+
+            return new QueryResult(rows, generatedKeys, affectedRows, generatedId);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao executar query: " + sql + " | " + e.getMessage(), e);
         }
     }
 
@@ -520,34 +565,11 @@ public class Query {
      * @throws RuntimeException se ocorrer erro SQL
      */
     public int execute() {
-        if (type == null) throw new IllegalStateException("Tipo de query nao definido.");
-
-        String sql;
-        List<Object> params;
-
-        switch (type) {
-            case INSERT -> { sql = buildInsertSql(); params = new ArrayList<>(insertVals.values()); }
-            case UPDATE -> { sql = buildUpdateSql(); params = collectUpdateParams(); }
-            case DELETE -> { sql = buildDeleteSql(); params = collectWhereParams(); }
-            case CREATE_TABLE -> { sql = buildCreateTableSql(); params = List.of(); }
-            default -> throw new IllegalStateException("execute() sem Class<T> e apenas para INSERT/UPDATE/DELETE/CREATE TABLE");
+        QueryResult result = executeResult(false);
+        if (type == Type.INSERT) {
+            return result.getGeneratedIdAsInt();
         }
-
-        try (PreparedStatement ps = DB.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            bindParams(ps, params);
-            ps.executeUpdate();
-
-            if (type == Type.INSERT) {
-                try (ResultSet keys = ps.getGeneratedKeys()) {
-                    if (keys.next()) return keys.getInt(1);
-                }
-                return 0;
-            }
-            return ps.getUpdateCount();
-
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao executar query: " + sql + " | " + e.getMessage(), e);
-        }
+        return result.getAffectedRows();
     }
 
     // --- SQL builders ---
@@ -675,6 +697,49 @@ public class Query {
         for (int i = 0; i < params.size(); i++) {
             ps.setObject(i + 1, params.get(i));
         }
+    }
+
+    private List<Map<String, Object>> readGeneratedKeys(PreparedStatement ps) throws SQLException {
+        try (ResultSet keys = ps.getGeneratedKeys()) {
+            return readRows(keys);
+        }
+    }
+
+    private Object firstGeneratedId(List<Map<String, Object>> generatedKeys) {
+        if (generatedKeys.isEmpty() || generatedKeys.get(0).isEmpty()) {
+            return null;
+        }
+        return generatedKeys.get(0).values().iterator().next();
+    }
+
+    private List<Map<String, Object>> fetchInsertedRow(Object generatedId) {
+        if (generatedId == null || insertTable == null) {
+            return List.of();
+        }
+
+        String sql = "SELECT * FROM " + insertTable + " WHERE id = ? " + config.limitSyntax(1, 0);
+        try (PreparedStatement ps = DB.getConnection().prepareStatement(sql)) {
+            ps.setObject(1, generatedId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return readRows(rs);
+            }
+        } catch (SQLException ignored) {
+            return List.of();
+        }
+    }
+
+    private List<Map<String, Object>> readRows(ResultSet rs) throws SQLException {
+        ResultSetMetaData meta = rs.getMetaData();
+        int cols = meta.getColumnCount();
+        List<Map<String, Object>> rows = new ArrayList<>();
+        while (rs.next()) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            for (int i = 1; i <= cols; i++) {
+                row.put(meta.getColumnLabel(i), rs.getObject(i));
+            }
+            rows.add(row);
+        }
+        return rows;
     }
 
 }

@@ -69,6 +69,23 @@ class DBTest {
     }
 
     @Test
+    @Order(2)
+    void insertExecuteResultDevolveIdELinhaCriada() {
+        QueryResult result = DB.query()
+            .insertInto("alunos")
+            .values(Map.of("nome", "Fabio", "turma", 1))
+            .executeResult();
+
+        assertTrue(result.hasGeneratedId());
+        assertTrue(result.getGeneratedIdAsInt() > 0);
+        assertEquals(1, result.getAffectedRows());
+        assertFalse(result.getGeneratedKeys().isEmpty());
+        assertFalse(result.isEmpty());
+        assertEquals("Fabio", result.first().get("nome"));
+        assertEquals(1, ((Number) result.first().get("turma")).intValue());
+    }
+
+    @Test
     @Order(3)
     void selectMapeiaRecord() {
         DB.query().insertInto("alunos").values(Map.of("nome", "Ana", "turma", 2)).execute();
@@ -164,6 +181,22 @@ class DBTest {
             .execute(Aluno.class);
 
         assertEquals(1, resultado.size());
+    }
+
+    @Test
+    @Order(8)
+    void updateExecuteResultDevolveLinhasAfetadas() {
+        DB.query().insertInto("alunos").values(Map.of("nome", "Hugo", "turma", 1)).execute();
+
+        QueryResult result = DB.query()
+            .update("alunos")
+            .set(Map.of("nome", "Hugo Silva"))
+            .where("nome", "=", "Hugo")
+            .executeResult();
+
+        assertEquals(1, result.getAffectedRows());
+        assertFalse(result.hasGeneratedId());
+        assertTrue(result.isEmpty());
     }
 
     @Test
