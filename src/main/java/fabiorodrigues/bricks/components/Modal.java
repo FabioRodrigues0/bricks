@@ -6,10 +6,12 @@ import javafx.scene.Scene;
 import javafx.scene.Node;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.Effect;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 
 /**
  * Janela modal bloqueante. Herda o tema da app principal.
@@ -121,9 +123,17 @@ public class Modal {
             modal.setTitle(title);
         }
 
-        StackPane root = new StackPane(content.build(modal).render());
+        StackPane root = new StackPane();
         root.setPadding(new javafx.geometry.Insets(16));
         root.setPrefSize(width, height);
+        Runnable renderContent = () -> {
+            root.getChildren().clear();
+            Node node = content.build(modal).render();
+            root.getChildren().add(node != null ? node : new Pane());
+        };
+        renderContent.run();
+        app.addRerenderListener(renderContent);
+        modal.addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> app.removeRerenderListener(renderContent));
 
         Scene scene = new Scene(root, width, height);
         applyBackdrop(app, modal);
@@ -159,6 +169,6 @@ public class Modal {
         dimEffect.setInput(previousEffect);
 
         ownerRoot.setEffect(dimEffect);
-        modal.setOnHidden(event -> ownerRoot.setEffect(previousEffect));
+        modal.addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> ownerRoot.setEffect(previousEffect));
     }
 }

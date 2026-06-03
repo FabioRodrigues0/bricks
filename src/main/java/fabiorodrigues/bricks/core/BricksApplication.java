@@ -49,6 +49,7 @@ public abstract class BricksApplication extends Application {
     private StackPane container;
     private String title = "Bricks App";
     private final List<State<?>> states = new ArrayList<>();
+    private final List<Runnable> rerenderListeners = new ArrayList<>();
     private BricksTheme theme = BricksTheme.material();
     private Scene scene;
     private double width = 800;
@@ -137,6 +138,30 @@ public abstract class BricksApplication extends Application {
         container.getChildren().clear();
         Node node = root().render();
         container.getChildren().add(node != null ? node : new Pane());
+        for (Runnable listener : List.copyOf(rerenderListeners)) {
+            listener.run();
+        }
+    }
+
+    /**
+     * Regista uma acao a executar apos cada re-render da aplicacao.
+     * Usado por componentes externos ao root principal, como modais abertos.
+     *
+     * @param listener acao a executar apos cada re-render
+     */
+    public void addRerenderListener(Runnable listener) {
+        if (listener != null) {
+            rerenderListeners.add(listener);
+        }
+    }
+
+    /**
+     * Remove um listener previamente registado com {@link #addRerenderListener(Runnable)}.
+     *
+     * @param listener listener a remover
+     */
+    public void removeRerenderListener(Runnable listener) {
+        rerenderListeners.remove(listener);
     }
 
     /**
