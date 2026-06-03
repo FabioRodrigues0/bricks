@@ -105,6 +105,17 @@ class TextFieldTest {
             .type(TextField.Type.NUMBER)
             .render();
 
+        field.setText("-12");
+
+        assertEquals("-12", field.getText());
+    }
+
+    @Test
+    void deveAceitarDecimaisQuandoTipoDouble() {
+        javafx.scene.control.TextField field = (javafx.scene.control.TextField) new TextField()
+            .decimal()
+            .render();
+
         field.setText("-12.5");
 
         assertEquals("-12.5", field.getText());
@@ -119,5 +130,44 @@ class TextFieldTest {
         field.setText("abc");
 
         assertEquals("", field.getText());
+    }
+
+    @Test
+    void deveAtualizarStateIntegerQuandoTipoNumber() {
+        State<Integer> state = new State<>(0);
+        javafx.scene.control.TextField field = (javafx.scene.control.TextField) new TextField()
+            .number()
+            .bindTo(state)
+            .render();
+
+        field.setText("42");
+
+        assertEquals(42, state.get());
+    }
+
+    @Test
+    void deveAtualizarStateFloatQuandoTipoFloat() {
+        State<Float> state = new State<>(0f);
+        javafx.scene.control.TextField field = (javafx.scene.control.TextField) new TextField()
+            .floating()
+            .bindTo(state)
+            .render();
+
+        field.setText("12,5");
+
+        assertEquals(12.5f, state.get());
+    }
+
+    @Test
+    void deveAtualizarStateDoubleQuandoTipoDouble() {
+        State<Double> state = new State<>(0.0);
+        javafx.scene.control.TextField field = (javafx.scene.control.TextField) new TextField()
+            .decimal()
+            .bindTo(state)
+            .render();
+
+        field.setText("12.5");
+
+        assertEquals(12.5, state.get());
     }
 }
