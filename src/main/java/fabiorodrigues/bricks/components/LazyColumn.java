@@ -306,13 +306,19 @@ public class LazyColumn<T> implements Component {
         HBox hbox = new HBox(colGap);
         for (T item : row) {
             Node node = itemTemplate.apply(item).render();
+            if (node == null) {
+                continue;
+            }
             if (node instanceof Region region) {
                 region.setMaxWidth(Double.MAX_VALUE);
             }
             HBox.setHgrow(node, Priority.ALWAYS);
             hbox.getChildren().add(node);
         }
-        for (int i = row.size(); i < cols; i++) {
+        if (hbox.getChildren().isEmpty()) {
+            return null;
+        }
+        for (int i = hbox.getChildren().size(); i < cols; i++) {
             Region filler = new Region();
             HBox.setHgrow(filler, Priority.ALWAYS);
             hbox.getChildren().add(filler);

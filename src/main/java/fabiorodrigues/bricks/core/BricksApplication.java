@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.function.Supplier;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -133,7 +135,8 @@ public abstract class BricksApplication extends Application {
     protected void rerender() {
         if (container == null) return;
         container.getChildren().clear();
-        container.getChildren().add(root().render());
+        Node node = root().render();
+        container.getChildren().add(node != null ? node : new Pane());
     }
 
     /**

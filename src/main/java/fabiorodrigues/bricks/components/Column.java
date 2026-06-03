@@ -88,7 +88,10 @@ public class Column implements Component {
         }
 
         for (Component child : children) {
-            vbox.getChildren().add(child.render());
+            Node node = child.render();
+            if (node != null) {
+                vbox.getChildren().add(node);
+            }
         }
 
         return vbox;

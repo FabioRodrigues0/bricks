@@ -6,7 +6,8 @@ import javafx.scene.Node;
  * Interface base de todos os componentes Bricks.
  *
  * <p>Cada componente sabe converter-se num {@link Node} JavaFX
- * atraves do metodo {@link #render()}.</p>
+ * atraves do metodo {@link #render()}. Componentes condicionais podem
+ * devolver {@code null} para indicar que nada deve ser adicionado ao scene graph.</p>
  *
  * <pre>{@code
  * Component titulo = new Text("Ola Mundo").fontSize(24);
@@ -17,7 +18,7 @@ public interface Component {
     /**
      * Converte este componente num {@link Node} JavaFX pronto a ser adicionado ao scene graph.
      *
-     * @return o Node JavaFX correspondente a este componente
+     * @return o Node JavaFX correspondente a este componente, ou {@code null} para nao renderizar nada
      */
     Node render();
 }

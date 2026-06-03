@@ -72,7 +72,10 @@ public class Box implements Component {
         }
 
         for (Component child : children) {
-            stack.getChildren().add(child.render());
+            Node node = child.render();
+            if (node != null) {
+                stack.getChildren().add(node);
+            }
         }
 
         return stack;

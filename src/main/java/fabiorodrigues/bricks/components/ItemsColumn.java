@@ -191,6 +191,9 @@ public class ItemsColumn<T> implements Component {
         if (cols == 1) {
             for (T item : lista) {
                 Node node = itemTemplate.apply(item).render();
+                if (node == null) {
+                    continue;
+                }
                 applyItemHeight(node);
                 container.getChildren().add(node);
             }
@@ -200,6 +203,9 @@ public class ItemsColumn<T> implements Component {
                 int end = Math.min(i + cols, lista.size());
                 for (int j = i; j < end; j++) {
                     Node node = itemTemplate.apply(lista.get(j)).render();
+                    if (node == null) {
+                        continue;
+                    }
                     if (node instanceof Region region) {
                         region.setMaxWidth(Double.MAX_VALUE);
                     }
@@ -207,7 +213,10 @@ public class ItemsColumn<T> implements Component {
                     HBox.setHgrow(node, Priority.ALWAYS);
                     row.getChildren().add(node);
                 }
-                for (int k = end; k < i + cols; k++) {
+                if (row.getChildren().isEmpty()) {
+                    continue;
+                }
+                for (int k = row.getChildren().size(); k < cols; k++) {
                     Region filler = new Region();
                     HBox.setHgrow(filler, Priority.ALWAYS);
                     row.getChildren().add(filler);

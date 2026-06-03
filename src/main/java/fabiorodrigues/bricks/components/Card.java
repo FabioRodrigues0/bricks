@@ -390,13 +390,21 @@ public class Card implements Component {
                 VBox contentBox = new VBox(4);
                 contentBox.setPadding(new javafx.geometry.Insets(padding));
                 for (Component child : children) {
-                    contentBox.getChildren().add(child.render());
+                    Node node = child.render();
+                    if (node != null) {
+                        contentBox.getChildren().add(node);
+                    }
                 }
-                vbox.getChildren().add(contentBox);
+                if (!contentBox.getChildren().isEmpty()) {
+                    vbox.getChildren().add(contentBox);
+                }
             }
         } else {
             for (Component child : children) {
-                vbox.getChildren().add(child.render());
+                Node node = child.render();
+                if (node != null) {
+                    vbox.getChildren().add(node);
+                }
             }
         }
 

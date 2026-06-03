@@ -88,7 +88,10 @@ public class Row implements Component {
         }
 
         for (Component child : children) {
-            hbox.getChildren().add(child.render());
+            Node node = child.render();
+            if (node != null) {
+                hbox.getChildren().add(node);
+            }
         }
 
         return hbox;
