@@ -1071,34 +1071,52 @@ public class BricksTheme {
         .bricks-calendar {
             -fx-background-color: %s;
             -fx-background-radius: %.0f;
-            -fx-padding: 12px;
+            -fx-border-color: %s;
+            -fx-border-radius: %.0f;
+            -fx-border-width: 1px;
         }
-        .button.bricks-calendar-header {
-            -fx-background-color: transparent;
-            -fx-text-fill: %s;
-            -fx-font-weight: bold;
-            -fx-font-size: 14px;
-            -fx-padding: 6 8 6 8;
-            -fx-cursor: hand;
-        }
-        .button.bricks-calendar-header:hover {
+
+        .bricks-calendar-info-panel {
             -fx-background-color: %s;
+            -fx-background-radius: %.0f;
+            -fx-border-color: %s;
+            -fx-border-radius: %.0f;
+            -fx-border-width: 1px;
+            -fx-padding: 16px;
         }
+
+        .bricks-calendar-event-row {
+            -fx-padding: 6px 0;
+            -fx-border-color: transparent transparent %s transparent;
+            -fx-border-width: 0 0 1px 0;
+        }
+
         .button.bricks-calendar-nav {
             -fx-background-color: transparent;
             -fx-text-fill: %s;
-            -fx-font-size: 14px;
-            -fx-padding: 6 10 6 10;
+            -fx-font-size: 16px;
             -fx-cursor: hand;
         }
         .button.bricks-calendar-nav:hover {
             -fx-background-color: %s;
         }
+
+        .button.bricks-calendar-header-btn {
+            -fx-background-color: transparent;
+            -fx-text-fill: %s;
+            -fx-font-size: 14px;
+            -fx-font-weight: bold;
+            -fx-cursor: hand;
+        }
+        .button.bricks-calendar-header-btn:hover {
+            -fx-background-color: %s;
+        }
+
         .label.bricks-calendar-weekday {
             -fx-text-fill: %s;
             -fx-font-size: 12px;
-            -fx-font-weight: bold;
         }
+
         .button.bricks-calendar-day {
             -fx-background-color: transparent;
             -fx-text-fill: %s;
@@ -1112,29 +1130,36 @@ public class BricksTheme {
         .button.bricks-calendar-day:hover {
             -fx-background-color: %s;
         }
-        .button.bricks-calendar-day-other {
+        .label.bricks-calendar-day-number {
             -fx-text-fill: %s;
-            -fx-opacity: 0.5;
+            -fx-font-size: 13px;
         }
-        .button.bricks-calendar-day-today {
-            -fx-border-color: %s;
-            -fx-border-radius: 18px;
-            -fx-border-width: 1.5px;
+        .button.bricks-calendar-day-other {
+            -fx-opacity: 0.4;
+        }
+        .button.bricks-calendar-day-today .label.bricks-calendar-day-number {
+            -fx-font-weight: bold;
+            -fx-text-fill: %s;
         }
         .button.bricks-calendar-day-selected {
-            -fx-background-color: %s;
+            -fx-border-color: %s;
+            -fx-border-radius: 18px;
+            -fx-border-width: 2px;
+            -fx-font-weight: bold;
+        }
+        .button.bricks-calendar-day-selected .label.bricks-calendar-day-number {
             -fx-text-fill: %s;
         }
-        .button.bricks-calendar-month {
+
+        .button.bricks-calendar-month-btn {
             -fx-background-color: transparent;
             -fx-text-fill: %s;
             -fx-background-radius: %.0f;
-            -fx-border-radius: %.0f;
-            -fx-padding: 0;
             -fx-cursor: hand;
-            -fx-font-weight: normal;
+            -fx-min-width: 60px;
+            -fx-min-height: 36px;
         }
-        .button.bricks-calendar-month:hover {
+        .button.bricks-calendar-month-btn:hover {
             -fx-background-color: %s;
         }
         .button.bricks-calendar-month-selected {
@@ -1235,6 +1260,13 @@ public class BricksTheme {
                 // calendar
                 toHex(c.surface()),
                 s.medium(),
+                toHex(c.outline()),
+                s.medium(),
+                toHex(c.surface()),
+                s.medium(),
+                toHex(c.outline()),
+                s.medium(),
+                toHex(c.outlineVariant()),
                 toHex(c.onSurface()),
                 toHex(c.surfaceContainerHigh()),
                 toHex(c.onSurface()),
@@ -1242,12 +1274,11 @@ public class BricksTheme {
                 toHex(c.onSurfaceVariant()),
                 toHex(c.onSurface()),
                 toHex(c.surfaceContainerHigh()),
-                toHex(c.onSurfaceVariant()),
                 toHex(c.primary()),
                 toHex(c.primary()),
-                toHex(c.onPrimary()),
+                toHex(c.primary()),
                 toHex(c.onSurface()),
-                s.extraSmall(),
+                toHex(c.onSurface()),
                 s.extraSmall(),
                 toHex(c.surfaceContainerHigh()),
                 toHex(c.primary()),

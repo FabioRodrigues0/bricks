@@ -2,6 +2,9 @@ package fabiorodrigues.bricks.components;
 
 import fabiorodrigues.bricks.core.Component;
 import fabiorodrigues.bricks.style.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javafx.scene.Node;
 import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
@@ -45,6 +48,7 @@ public class IconButton implements Component {
     private Runnable onClick;
     private String tooltip = null;
     private Modifier modifier;
+    private final List<String> styleClasses = new ArrayList<>();
 
     /**
      * Cria um botao so com icone.
@@ -141,6 +145,19 @@ public class IconButton implements Component {
         return this;
     }
 
+    /**
+     * Adiciona classes CSS ao botao renderizado.
+     *
+     * @param classes classes CSS a adicionar
+     * @return este componente para encadeamento
+     */
+    public IconButton styleClass(String... classes) {
+        Arrays.stream(classes)
+            .filter(c -> c != null && !c.isBlank())
+            .forEach(this.styleClasses::add);
+        return this;
+    }
+
     @Override
     public Node render() {
         Button bricksButton = new Button(text != null ? text : "");
@@ -149,6 +166,7 @@ public class IconButton implements Component {
 
         javafx.scene.control.Button fxButton =
                 (javafx.scene.control.Button) bricksButton.render();
+        fxButton.getStyleClass().addAll(styleClasses);
 
         if (danger) {
             fxButton.getStyleClass().add("bricks-button-danger");

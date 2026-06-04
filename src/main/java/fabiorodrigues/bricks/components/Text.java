@@ -2,6 +2,10 @@ package fabiorodrigues.bricks.components;
 
 import fabiorodrigues.bricks.core.Component;
 import fabiorodrigues.bricks.style.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 
@@ -19,6 +23,8 @@ public class Text implements Component {
     private Modifier modifier;
     private double fontSize = -1;
     private boolean bold = false;
+    private Pos alignment;
+    private final List<String> styleClasses = new ArrayList<>();
 
     /**
      * Cria um componente de texto com o conteudo dado.
@@ -61,14 +67,43 @@ public class Text implements Component {
         return this;
     }
 
+    /**
+     * Define o alinhamento do texto dentro do label renderizado.
+     *
+     * @param alignment alinhamento a aplicar
+     * @return este componente para encadeamento
+     */
+    public Text alignment(Pos alignment) {
+        this.alignment = alignment;
+        return this;
+    }
+
+    /**
+     * Adiciona classes CSS ao texto renderizado.
+     *
+     * @param classes classes CSS a adicionar
+     * @return este componente para encadeamento
+     */
+    public Text styleClass(String... classes) {
+        Arrays.stream(classes)
+            .filter(c -> c != null && !c.isBlank())
+            .forEach(this.styleClasses::add);
+        return this;
+    }
+
     @Override
     public Node render() {
         Label label = new Label(content);
         label.getStyleClass().add("bricks-text");
+        label.getStyleClass().addAll(styleClasses);
 
         // modifier aplica primeiro (pode definir fontSize entre outros)
         if (modifier != null) {
             modifier.applyTo(label);
+        }
+
+        if (alignment != null) {
+            label.setAlignment(alignment);
         }
 
         // atalhos como inline style — ganham sobre CSS do tema, modifier e containers como ListCell

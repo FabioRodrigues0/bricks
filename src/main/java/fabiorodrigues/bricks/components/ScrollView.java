@@ -2,6 +2,9 @@ package fabiorodrigues.bricks.components;
 
 import fabiorodrigues.bricks.core.Component;
 import fabiorodrigues.bricks.style.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 
@@ -29,6 +32,7 @@ public class ScrollView implements Component {
     private boolean scrollH = true;
     private boolean scrollV = true;
     private Modifier modifier;
+    private final List<String> styleClasses = new ArrayList<>();
 
     /**
      * Cria um ScrollView com o componente dado como conteudo.
@@ -72,10 +76,24 @@ public class ScrollView implements Component {
         return this;
     }
 
+    /**
+     * Adiciona classes CSS ao scroll renderizado.
+     *
+     * @param classes classes CSS a adicionar
+     * @return este componente para encadeamento
+     */
+    public ScrollView styleClass(String... classes) {
+        Arrays.stream(classes)
+            .filter(c -> c != null && !c.isBlank())
+            .forEach(this.styleClasses::add);
+        return this;
+    }
+
     @Override
     public Node render() {
         ScrollPane scrollPane = new ScrollPane(content.render());
         scrollPane.getStyleClass().add("bricks-scroll-view");
+        scrollPane.getStyleClass().addAll(styleClasses);
         scrollPane.setFitToWidth(true);
         scrollPane.setHbarPolicy(scrollH
             ? ScrollPane.ScrollBarPolicy.AS_NEEDED

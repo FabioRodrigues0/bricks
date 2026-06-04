@@ -28,6 +28,7 @@ public class Row implements Component {
     private Modifier modifier;
     private double gap;
     private double padding;
+    private final List<String> styleClasses = new ArrayList<>();
 
     /**
      * Define o espacamento entre filhos.
@@ -63,6 +64,19 @@ public class Row implements Component {
     }
 
     /**
+     * Adiciona classes CSS ao layout renderizado.
+     *
+     * @param classes classes CSS a adicionar
+     * @return este componente para encadeamento
+     */
+    public Row styleClass(String... classes) {
+        Arrays.stream(classes)
+            .filter(c -> c != null && !c.isBlank())
+            .forEach(this.styleClasses::add);
+        return this;
+    }
+
+    /**
      * Define os componentes filhos deste layout.
      *
      * @param children os componentes a dispor horizontalmente
@@ -77,6 +91,7 @@ public class Row implements Component {
     public Node render() {
         HBox hbox = new HBox(this.gap);
         hbox.getStyleClass().add("bricks-row");
+        hbox.getStyleClass().addAll(styleClasses);
         hbox.setPadding(new Insets(this.padding));
         hbox.setMaxWidth(Double.MAX_VALUE);
 

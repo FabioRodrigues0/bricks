@@ -29,6 +29,7 @@ public class Column implements Component {
     private Modifier modifier;
     private double gap;
     private double padding;
+    private final List<String> styleClasses = new ArrayList<>();
 
     /**
      * Define o espacamento entre filhos.
@@ -64,6 +65,19 @@ public class Column implements Component {
     }
 
     /**
+     * Adiciona classes CSS ao layout renderizado.
+     *
+     * @param classes classes CSS a adicionar
+     * @return este componente para encadeamento
+     */
+    public Column styleClass(String... classes) {
+        Arrays.stream(classes)
+            .filter(c -> c != null && !c.isBlank())
+            .forEach(this.styleClasses::add);
+        return this;
+    }
+
+    /**
      * Define os componentes filhos deste layout.
      *
      * @param children os componentes a dispor verticalmente
@@ -78,6 +92,7 @@ public class Column implements Component {
     public Node render() {
         VBox vbox = new VBox(this.gap);
         vbox.getStyleClass().add("bricks-column");
+        vbox.getStyleClass().addAll(styleClasses);
         vbox.setPadding(new Insets(this.padding));
 
         if (modifier != null) {

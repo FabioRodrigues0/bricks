@@ -3,6 +3,9 @@ package fabiorodrigues.bricks.components;
 import fabiorodrigues.bricks.core.Component;
 import fabiorodrigues.bricks.core.State;
 import fabiorodrigues.bricks.style.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 
@@ -36,6 +39,7 @@ public class Button implements Component {
     private Modifier modifier;
     private boolean enabled = true;
     private State<Boolean> enabledState;
+    private final List<String> styleClasses = new ArrayList<>();
 
     /**
      * Cria um botao com o texto dado.
@@ -111,10 +115,24 @@ public class Button implements Component {
         return this;
     }
 
+    /**
+     * Adiciona classes CSS ao botao renderizado.
+     *
+     * @param classes classes CSS a adicionar
+     * @return este componente para encadeamento
+     */
+    public Button styleClass(String... classes) {
+        Arrays.stream(classes)
+            .filter(c -> c != null && !c.isBlank())
+            .forEach(this.styleClasses::add);
+        return this;
+    }
+
     @Override
     public Node render() {
         javafx.scene.control.Button btn = new javafx.scene.control.Button(label);
         btn.getStyleClass().add("bricks-button");
+        btn.getStyleClass().addAll(styleClasses);
 
         boolean isEnabled = enabledState != null ? enabledState.get() : enabled;
 
