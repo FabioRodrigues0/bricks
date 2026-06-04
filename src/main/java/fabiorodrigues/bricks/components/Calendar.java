@@ -393,6 +393,16 @@ public class Calendar implements Component {
     }
 
     private Node buildEventRow(EventEntry entry) {
+        Component customComponent = renderEventComponent(entry);
+        if (customComponent != null) {
+            VBox eventoBox = (VBox) new Column()
+                .gap(2)
+                .styleClass("bricks-calendar-event-row")
+                .children(customComponent)
+                .render();
+            return eventoBox;
+        }
+
         VBox eventoBox = (VBox) new Column()
             .gap(2)
             .styleClass("bricks-calendar-event-row")
@@ -411,6 +421,16 @@ public class Calendar implements Component {
         }
 
         return eventoBox;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Component renderEventComponent(EventEntry entry) {
+        Function<Object, Component> renderer =
+            (Function<Object, Component>) (Function<?, ?>) entry.source().getComponentRenderer();
+        if (renderer == null) {
+            return null;
+        }
+        return renderer.apply(entry.event());
     }
 
     private List<EventEntry> eventEntriesForDay(LocalDate dia) {

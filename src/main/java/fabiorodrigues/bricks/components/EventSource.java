@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import fabiorodrigues.bricks.core.Component;
 import javafx.scene.paint.Color;
 
 /**
@@ -27,6 +28,7 @@ public class EventSource<T> {
     private Function<T, LocalDate> dateExtractor;
     private List<CalendarHighlight> highlightRules = new ArrayList<>();
     private List<Function<T, String>> labelExtractors = new ArrayList<>();
+    private Function<T, Component> componentRenderer;
 
     public EventSource(List<T> items) {
         this.items = items != null ? items : List.of();
@@ -64,6 +66,18 @@ public class EventSource<T> {
         return this;
     }
 
+    /**
+     * Define como renderizar cada evento no painel default do informacaoDia.
+     *
+     * <pre>{@code
+     * .component(evento -> new Text(evento.getName()))
+     * }</pre>
+     */
+    public EventSource<T> component(Function<T, Component> renderer) {
+        this.componentRenderer = renderer;
+        return this;
+    }
+
     public List<T> getItems() {
         return items;
     }
@@ -78,6 +92,10 @@ public class EventSource<T> {
 
     public List<Function<T, String>> getLabelExtractors() {
         return labelExtractors;
+    }
+
+    public Function<T, Component> getComponentRenderer() {
+        return componentRenderer;
     }
 
     /**
