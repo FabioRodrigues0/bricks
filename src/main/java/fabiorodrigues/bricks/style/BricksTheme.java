@@ -1156,8 +1156,10 @@ public class BricksTheme {
             -fx-text-fill: %s;
             -fx-background-radius: %.0f;
             -fx-cursor: hand;
-            -fx-min-width: 60px;
-            -fx-min-height: 36px;
+            -fx-font-size: 12px;
+            -fx-padding: 0;
+            -fx-min-width: 80px;
+            -fx-min-height: 40px;
         }
         .button.bricks-calendar-month-btn:hover {
             -fx-background-color: %s;

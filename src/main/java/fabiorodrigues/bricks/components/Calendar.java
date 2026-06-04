@@ -33,6 +33,10 @@ import javafx.scene.shape.Circle;
  */
 public class Calendar implements Component {
 
+    private static final double CALENDAR_WIDTH = 300;
+    private static final double CALENDAR_HEIGHT = 360;
+    private static final int INFO_EVENTS_PER_PAGE = 4;
+
     private State<LocalDate> boundState = null;
     private final List<EventSource<?>> sources = new ArrayList<>();
     private boolean showInfoPanel = false;
@@ -42,6 +46,8 @@ public class Calendar implements Component {
 
     private YearMonth mesAtual = YearMonth.now();
     private boolean modoMeses = false;
+    private LocalDate infoPanelDay = null;
+    private int infoPage = 0;
     private Node renderedRoot;
 
     public Calendar bindTo(State<LocalDate> state) {
@@ -124,7 +130,7 @@ public class Calendar implements Component {
         VBox cal = (VBox) new Column()
             .gap(8)
             .padding(12)
-            .modifier(new Modifier().width(300))
+            .modifier(new Modifier().size(CALENDAR_WIDTH, CALENDAR_HEIGHT))
             .styleClass("bricks-calendar")
             .render();
 
@@ -255,7 +261,12 @@ public class Calendar implements Component {
         grid.setAlignment(Pos.CENTER);
         grid.setPadding(new Insets(8));
 
-        String[] meses = {"Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"};
+        String[] meses = {
+            "Janeiro", "Fevereiro", "Mar\u00e7o",
+            "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro",
+            "Outubro", "Novembro", "Dezembro"
+        };
 
         for (int i = 0; i < 12; i++) {
             final int mesIdx = i + 1;
@@ -266,13 +277,13 @@ public class Calendar implements Component {
                     modoMeses = false;
                     triggerRefresh();
                 },
-                new Modifier().size(60, 36),
+                new Modifier().size(80, 40),
                 mesIdx == mesAtual.getMonthValue()
                     ? new String[] {"bricks-calendar-month-btn", "bricks-calendar-month-selected"}
                     : new String[] {"bricks-calendar-month-btn"}
             );
 
-            grid.add(btn, i % 4, i / 4);
+            grid.add(btn, i % 3, i / 3);
         }
 
         return grid;
@@ -288,6 +299,7 @@ public class Calendar implements Component {
             Component panel = customInfoPanel.apply(todosEventos);
             VBox infoCard = (VBox) new Column()
                 .gap(12)
+                .modifier(new Modifier().height(CALENDAR_HEIGHT))
                 .styleClass("bricks-calendar-info-panel")
                 .render();
             Node customNode = panel != null ? panel.render() : null;
@@ -297,8 +309,13 @@ public class Calendar implements Component {
             return scrollPanel(infoCard);
         }
 
+        List<EventEntry> entries = eventEntriesForDay(dia);
+        int totalPages = Math.max(1, (int) Math.ceil(entries.size() / (double) INFO_EVENTS_PER_PAGE));
+        syncInfoPage(dia, totalPages);
+
         VBox panel = (VBox) new Column()
             .gap(12)
+            .modifier(new Modifier().height(CALENDAR_HEIGHT))
             .styleClass("bricks-calendar-info-panel")
             .render();
 
@@ -307,46 +324,116 @@ public class Calendar implements Component {
         String dataFormatada = dia.getDayOfMonth() + " de "
             + mesesPt[dia.getMonthValue() - 1] + " de " + dia.getYear();
 
-        Node titulo = new Row()
+        Node titulo = buildInfoHeader(dataFormatada, totalPages, entries.size());
+        panel.getChildren().add(titulo);
+        panel.getChildren().add(new Divider().render());
+
+        if (entries.isEmpty()) {
+            panel.getChildren().add(new Text("Sem eventos neste dia.").render());
+        } else {
+            int from = infoPage * INFO_EVENTS_PER_PAGE;
+            int to = Math.min(from + INFO_EVENTS_PER_PAGE, entries.size());
+            for (EventEntry entry : entries.subList(from, to)) {
+                panel.getChildren().add(buildEventRow(entry));
+            }
+        }
+
+        return scrollPanel(panel);
+    }
+
+    private Node buildInfoHeader(String dataFormatada, int totalPages, int totalEvents) {
+        Component title = new Row()
             .gap(8)
             .modifier(new Modifier().alignment(Pos.CENTER_LEFT))
             .children(
                 new Icon("far-calendar-alt").size(15),
                 new Text(dataFormatada).fontSize(15).bold()
+            );
+
+        return new Row()
+            .gap(8)
+            .modifier(new Modifier().alignment(Pos.CENTER_LEFT))
+            .children(
+                title,
+                new When(totalPages > 1).then(() -> buildInfoPagination(totalPages, totalEvents))
             )
             .render();
-        panel.getChildren().add(titulo);
-        panel.getChildren().add(new Divider().render());
+    }
 
-        if (todosEventos.isEmpty()) {
-            panel.getChildren().add(new Text("Sem eventos neste dia.").render());
-        } else {
-            for (EventSource<?> source : sources) {
-                List<?> eventosDaSource = source.getEventsForDay(dia);
-                for (Object evento : eventosDaSource) {
-                    VBox eventoBox = (VBox) new Column()
-                        .gap(2)
-                        .styleClass("bricks-calendar-event-row")
-                        .render();
-
-                    List<Function<Object, String>> extractors = labelExtractors(source);
-                    if (!extractors.isEmpty()) {
-                        for (Function<Object, String> extractor : extractors) {
-                            String value = extractor.apply(evento);
-                            if (value != null) {
-                                eventoBox.getChildren().add(new Text(value).fontSize(13).render());
-                            }
+    private Node buildInfoPagination(int totalPages, int totalEvents) {
+        return new Row()
+            .gap(4)
+            .modifier(new Modifier().alignment(Pos.CENTER_RIGHT).fillMaxWidth())
+            .children(
+                () -> calendarIconButton(
+                    "fas-chevron-left",
+                    "Pagina anterior",
+                    infoPage > 0,
+                    () -> {
+                        if (infoPage > 0) {
+                            infoPage--;
+                            triggerRefresh();
                         }
-                    } else {
-                        eventoBox.getChildren().add(new Text(String.valueOf(evento)).fontSize(13).render());
                     }
+                ),
+                new Text((infoPage + 1) + "/" + totalPages + " (" + totalEvents + ")").fontSize(12),
+                () -> calendarIconButton(
+                    "fas-chevron-right",
+                    "Proxima pagina",
+                    infoPage < totalPages - 1,
+                    () -> {
+                        if (infoPage < totalPages - 1) {
+                            infoPage++;
+                            triggerRefresh();
+                        }
+                    }
+                )
+            )
+            .render();
+    }
 
-                    panel.getChildren().add(eventoBox);
+    private Node buildEventRow(EventEntry entry) {
+        VBox eventoBox = (VBox) new Column()
+            .gap(2)
+            .styleClass("bricks-calendar-event-row")
+            .render();
+
+        List<Function<Object, String>> extractors = labelExtractors(entry.source());
+        if (!extractors.isEmpty()) {
+            for (Function<Object, String> extractor : extractors) {
+                String value = extractor.apply(entry.event());
+                if (value != null) {
+                    eventoBox.getChildren().add(new Text(value).fontSize(13).render());
                 }
             }
+        } else {
+            eventoBox.getChildren().add(new Text(String.valueOf(entry.event())).fontSize(13).render());
         }
 
-        return scrollPanel(panel);
+        return eventoBox;
+    }
+
+    private List<EventEntry> eventEntriesForDay(LocalDate dia) {
+        List<EventEntry> entries = new ArrayList<>();
+        for (EventSource<?> source : sources) {
+            for (Object evento : source.getEventsForDay(dia)) {
+                entries.add(new EventEntry(source, evento));
+            }
+        }
+        return entries;
+    }
+
+    private void syncInfoPage(LocalDate dia, int totalPages) {
+        if (!dia.equals(infoPanelDay)) {
+            infoPanelDay = dia;
+            infoPage = 0;
+        }
+        if (infoPage >= totalPages) {
+            infoPage = totalPages - 1;
+        }
+        if (infoPage < 0) {
+            infoPage = 0;
+        }
     }
 
     private Node scrollPanel(VBox panel) {
@@ -432,8 +519,13 @@ public class Calendar implements Component {
     }
 
     private javafx.scene.control.Button calendarIconButton(String icon, String tooltip, Runnable action) {
+        return calendarIconButton(icon, tooltip, true, action);
+    }
+
+    private javafx.scene.control.Button calendarIconButton(String icon, String tooltip, boolean enabled, Runnable action) {
         javafx.scene.control.Button button = (javafx.scene.control.Button) new IconButton(icon)
             .ghost()
+            .enabled(enabled)
             .tooltip(tooltip)
             .onClick(action)
             .styleClass("bricks-calendar-nav")
@@ -461,4 +553,6 @@ public class Calendar implements Component {
             renderedRoot = oldRoot;
         }
     }
+
+    private record EventEntry(EventSource<?> source, Object event) {}
 }

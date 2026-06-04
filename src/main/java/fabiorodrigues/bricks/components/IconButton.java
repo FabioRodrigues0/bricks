@@ -45,6 +45,7 @@ public class IconButton implements Component {
     private Color color = null;
     private boolean danger = false;
     private boolean ghost = false;
+    private boolean enabled = true;
     private Runnable onClick;
     private String tooltip = null;
     private Modifier modifier;
@@ -113,6 +114,17 @@ public class IconButton implements Component {
     }
 
     /**
+     * Ativa ou desativa o botao.
+     *
+     * @param enabled true para ativo, false para desativado
+     * @return este componente para encadeamento
+     */
+    public IconButton enabled(boolean enabled) {
+        this.enabled = enabled;
+        return this;
+    }
+
+    /**
      * Define a acao ao clicar no botao.
      *
      * @param handler {@code Runnable} — acao a executar
@@ -163,6 +175,7 @@ public class IconButton implements Component {
         Button bricksButton = new Button(text != null ? text : "");
         if (onClick != null) bricksButton.onClick(onClick);
         if (modifier != null) bricksButton.modifier(modifier);
+        bricksButton.enabled(enabled);
 
         javafx.scene.control.Button fxButton =
                 (javafx.scene.control.Button) bricksButton.render();
