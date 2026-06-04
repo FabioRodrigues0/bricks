@@ -327,8 +327,8 @@ public class Query {
     }
 
     /**
-     * Adiciona um par campo-valor ao INSERT, de forma individual e legivel.
-     * Alternativa ao {@link #values(Map)} para melhor clareza visual.
+     * Adiciona um par campo-valor ao INSERT ou UPDATE, de forma individual e legivel.
+     * Alternativa ao {@link #values(Map)} e {@link #set(Map)} para melhor clareza visual.
      *
      * <pre>{@code
      * DB.query()
@@ -336,15 +336,26 @@ public class Query {
      *     .value("nome", "Joao Silva")
      *     .value("grau", "Doutor")
      *     .execute();
+     *
+     * DB.query()
+     *     .update("professores")
+     *     .value("grau", "Catedratico")
+     *     .where("id", "=", 1)
+     *     .execute();
      * }</pre>
      *
      * @param field nome da coluna
-     * @param val   valor a inserir
+     * @param val   valor a inserir ou atualizar
      * @return esta query para encadeamento
      */
     public Query value(String field, Object val) {
-        if (this.insertVals == null) this.insertVals = new java.util.LinkedHashMap<>();
-        this.insertVals.put(field, val);
+        if (this.type == Type.UPDATE) {
+            if (this.setVals == null) this.setVals = new LinkedHashMap<>();
+            this.setVals.put(field, val);
+        } else {
+            if (this.insertVals == null) this.insertVals = new LinkedHashMap<>();
+            this.insertVals.put(field, val);
+        }
         return this;
     }
 
@@ -621,6 +632,8 @@ public class Query {
     }
 
     private String buildUpdateSql() {
+        ensureUpdateHasValues();
+
         String sets = setVals.keySet().stream()
             .map(k -> k + " = ?")
             .collect(Collectors.joining(", "));
@@ -679,9 +692,17 @@ public class Query {
     }
 
     private List<Object> collectUpdateParams() {
+        ensureUpdateHasValues();
+
         List<Object> params = new ArrayList<>(setVals.values());
         params.addAll(collectWhereParams());
         return params;
+    }
+
+    private void ensureUpdateHasValues() {
+        if (setVals == null || setVals.isEmpty()) {
+            throw new IllegalStateException("UPDATE requer pelo menos um valor. Use .value(\"coluna\", valor) ou .set(Map.of(...)).");
+        }
     }
 
     private List<Object> collectSelectParams() {

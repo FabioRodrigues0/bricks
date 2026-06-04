@@ -185,6 +185,29 @@ class DBTest {
 
     @Test
     @Order(8)
+    void updateAceitaValueEncadeado() {
+        DB.query().insertInto("alunos").values(Map.of("nome", "Hugo", "turma", 1)).execute();
+
+        int afetados = DB.query()
+            .update("alunos")
+            .value("nome", "Hugo Silva")
+            .value("turma", 2)
+            .where("nome", "=", "Hugo")
+            .execute();
+
+        assertEquals(1, afetados);
+
+        List<Aluno> resultado = DB.query()
+            .select("id", "nome", "turma").from("alunos")
+            .where("nome", "=", "Hugo Silva")
+            .execute(Aluno.class);
+
+        assertEquals(1, resultado.size());
+        assertEquals(2, resultado.get(0).turma());
+    }
+
+    @Test
+    @Order(8)
     void updateExecuteResultDevolveLinhasAfetadas() {
         DB.query().insertInto("alunos").values(Map.of("nome", "Hugo", "turma", 1)).execute();
 
