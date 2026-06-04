@@ -43,7 +43,7 @@ public class EventSource<T> {
 
     /**
      * Define as regras de highlight por ordem de prioridade (mais urgente primeiro).
-     * A primeira regra cujo threshold >= dias restantes e aplicada.
+     * A primeira regra cujo threshold &gt;= dias restantes e aplicada.
      */
     public EventSource<T> highlightRules(List<CalendarHighlight> rules) {
         this.highlightRules = rules != null ? rules : List.of();

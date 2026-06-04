@@ -4,7 +4,7 @@ import javafx.scene.paint.Color;
 
 /**
  * Regra de cor para highlight de dias no Calendar.
- * A cor aplica-se quando os dias restantes sao <= ao threshold.
+ * A cor aplica-se quando os dias restantes sao &lt;= ao threshold.
  *
  * <pre>{@code
  * List.of(
