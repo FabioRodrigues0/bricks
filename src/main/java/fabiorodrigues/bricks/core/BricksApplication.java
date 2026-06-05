@@ -56,6 +56,9 @@ public abstract class BricksApplication extends Application {
     private double height = 600;
     private Stage stage;
     private BricksScene currentScene = null;
+    private String trayIconPath = null;
+    private String trayTooltip = "Bricks App";
+    private boolean minimizeToTray = false;
 
     /**
      * Define a arvore de componentes da aplicacao. Chamado a cada re-render.
@@ -128,6 +131,50 @@ public abstract class BricksApplication extends Application {
         stage.setScene(scene);
         stage.setTitle(title);
         stage.show();
+
+        if (trayIconPath != null) {
+            Platform.setImplicitExit(false);
+            TrayManager.getInstance().init(stage, trayIconPath, trayTooltip, title);
+            stage.setOnCloseRequest(e -> {
+                e.consume();
+                stage.hide();
+            });
+        }
+
+        if (minimizeToTray) {
+            stage.iconifiedProperty().addListener((obs, wasMin, isMin) -> {
+                if (isMin) {
+                    Platform.runLater(stage::hide);
+                }
+            });
+        }
+    }
+
+    /**
+     * Define o icone da system tray.
+     * Ativa automaticamente o suporte a notificacoes do sistema e o fechar-para-tray.
+     *
+     * @param imagePath {@code String} — caminho do icone no classpath (ex: "/logo.png")
+     */
+    protected void setTrayIcon(String imagePath) {
+        this.trayIconPath = imagePath;
+    }
+
+    /**
+     * Define o tooltip do icone na tray.
+     *
+     * @param tooltip {@code String} — texto ao passar o rato no icone
+     */
+    protected void setTrayTooltip(String tooltip) {
+        this.trayTooltip = tooltip;
+    }
+
+    /**
+     * Ativa o comportamento de ir para a tray quando a janela e minimizada,
+     * em vez de minimizar normalmente para a barra de tarefas.
+     */
+    protected void minimizeToTray() {
+        this.minimizeToTray = true;
     }
 
     /**

@@ -6,8 +6,10 @@ import fabiorodrigues.bricks.style.Modifier;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.skin.DatePickerSkin;
 import javafx.scene.layout.VBox;
 
 /**
@@ -83,6 +85,8 @@ public class DatePicker implements Component {
             bindPicker(picker);
         }
 
+        picker.setOnShown(e -> Platform.runLater(() -> applyThemeToPopup(picker)));
+
         if (modifier != null) {
             modifier.applyTo(picker);
         }
@@ -96,6 +100,24 @@ public class DatePicker implements Component {
         }
 
         return picker;
+    }
+
+    private void applyThemeToPopup(javafx.scene.control.DatePicker picker) {
+        if (!(picker.getSkin() instanceof DatePickerSkin skin)) {
+            return;
+        }
+
+        Node popupContent = skin.getPopupContent();
+        if (
+            popupContent != null &&
+            popupContent.getScene() != null &&
+            picker.getScene() != null
+        ) {
+            popupContent
+                .getScene()
+                .getStylesheets()
+                .setAll(picker.getScene().getStylesheets());
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -4,6 +4,7 @@ module fabiorodrigues.bricks {
     requires org.kordamp.ikonli.core;
     requires org.kordamp.ikonli.javafx;
     requires java.sql;
+    requires java.desktop;
 
     exports fabiorodrigues.bricks.core;
     exports fabiorodrigues.bricks.components;

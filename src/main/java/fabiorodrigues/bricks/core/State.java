@@ -90,7 +90,7 @@ public class State<T> {
      *
      * @param callback a acao a executar
      */
-    void addListener(Runnable callback) {
+    public void addListener(Runnable callback) {
         this.listeners.add(callback);
     }
 }

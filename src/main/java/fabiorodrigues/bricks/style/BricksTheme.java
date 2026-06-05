@@ -861,6 +861,8 @@ public class BricksTheme {
 
         /* ---- TextField ---- */
         .text-field.bricks-text-field {
+            -fx-min-height: 38px;
+            -fx-pref-height: 38px;
             -fx-background-color: %s;
             -fx-text-fill: %s;
             -fx-prompt-text-fill: %s;
@@ -917,14 +919,26 @@ public class BricksTheme {
 
         /* ---- Dropdown (ComboBox) ---- */
         .combo-box.bricks-dropdown {
+            -fx-min-height: 38px;
+            -fx-pref-height: 38px;
             -fx-background-color: %s;
             -fx-border-color: %s;
+            -fx-border-width: 1;
             -fx-border-radius: %.0f;
             -fx-background-radius: %.0f;
             -fx-font-size: %.0fpx;
         }
         .combo-box.bricks-dropdown .list-cell {
             -fx-text-fill: %s;
+            -fx-padding: 8 12 8 12;
+        }
+        .combo-box.bricks-dropdown > .arrow-button {
+            -fx-background-color: transparent;
+            -fx-padding: 0 10 0 8;
+        }
+        .combo-box.bricks-dropdown:focused {
+            -fx-border-color: %s;
+            -fx-border-width: 2;
         }
         .list-view#list-view {
             -fx-background-color: %s;
@@ -1050,6 +1064,8 @@ public class BricksTheme {
         /* ---- DatePicker ---- */
         .date-picker.bricks-date-picker {
             -fx-pref-width: 200px;
+            -fx-min-height: 38px;
+            -fx-pref-height: 38px;
             -fx-background-color: %s;
             -fx-border-color: %s;
             -fx-border-width: 1;
@@ -1065,6 +1081,83 @@ public class BricksTheme {
             -fx-background-color: %s;
             -fx-text-fill: %s;
             -fx-prompt-text-fill: %s;
+            -fx-border-color: transparent;
+            -fx-background-radius: %.0f 0 0 %.0f;
+            -fx-padding: 8 12 8 12;
+        }
+        .date-picker.bricks-date-picker .arrow-button {
+            -fx-background-color: %s;
+            -fx-background-radius: 0 %.0f %.0f 0;
+            -fx-border-color: transparent transparent transparent %s;
+            -fx-border-width: 0 0 0 1;
+            -fx-padding: 0 10 0 10;
+        }
+        .date-picker.bricks-date-picker .arrow-button:hover {
+            -fx-background-color: %s;
+        }
+        .date-picker.bricks-date-picker .arrow {
+            -fx-background-color: %s;
+        }
+        .date-picker-popup {
+            -fx-background-color: %s;
+            -fx-border-color: %s;
+            -fx-border-radius: %.0f;
+            -fx-background-radius: %.0f;
+        }
+        .date-picker-popup .month-year-pane {
+            -fx-background-color: %s;
+        }
+        .date-picker-popup .spinner .button {
+            -fx-background-color: transparent;
+            -fx-text-fill: %s;
+            -fx-cursor: hand;
+        }
+        .date-picker-popup .spinner .button:hover {
+            -fx-background-color: %s;
+        }
+        .date-picker-popup .spinner .label,
+        .date-picker-popup .day-name-cell,
+        .date-picker-popup .week-number-cell {
+            -fx-text-fill: %s;
+        }
+        .date-picker-popup .day-cell {
+            -fx-background-color: %s;
+            -fx-text-fill: %s;
+            -fx-border-color: %s;
+        }
+        .date-picker-popup .day-cell:hover {
+            -fx-background-color: %s;
+        }
+        .date-picker-popup .day-cell:selected {
+            -fx-background-color: %s;
+            -fx-text-fill: %s;
+        }
+
+        /* ---- Alert ---- */
+        .dialog-pane.bricks-alert {
+            -fx-background-color: %s;
+            -fx-border-color: %s;
+            -fx-border-width: 1;
+        }
+        .dialog-pane.bricks-alert > .content.label {
+            -fx-text-fill: %s;
+            -fx-font-size: %.0fpx;
+        }
+        .dialog-pane.bricks-alert:header .header-panel {
+            -fx-background-color: %s;
+        }
+        .dialog-pane.bricks-alert .button {
+            -fx-background-color: %s;
+            -fx-text-fill: %s;
+            -fx-font-size: %.0fpx;
+            -fx-font-weight: bold;
+            -fx-background-radius: %.0f;
+            -fx-border-radius: %.0f;
+            -fx-padding: 8 18 8 18;
+            -fx-cursor: hand;
+        }
+        .dialog-pane.bricks-alert .button:hover {
+            -fx-background-color: %s;
         }
 
         /* ---- Calendar ---- */
@@ -1217,6 +1310,7 @@ public class BricksTheme {
                 s.extraSmall(),
                 t.bodyMedium(),
                 toHex(c.onSurface()),
+                toHex(c.primary()),
                 toHex(c.surface()),
                 toHex(c.outline()),
                 s.extraSmall(),
@@ -1259,6 +1353,40 @@ public class BricksTheme {
                 toHex(c.surface()),
                 toHex(c.onSurface()),
                 toHex(c.onSurfaceVariant()),
+                s.extraSmall(),
+                s.extraSmall(),
+                toHex(c.surfaceContainerHigh()),
+                s.extraSmall(),
+                s.extraSmall(),
+                toHex(c.outline()),
+                toHex(c.surfaceContainerHigh()),
+                toHex(c.onSurfaceVariant()),
+                toHex(c.surface()),
+                toHex(c.outline()),
+                s.extraSmall(),
+                s.extraSmall(),
+                toHex(c.surface()),
+                toHex(c.onSurface()),
+                toHex(c.surfaceContainerHigh()),
+                toHex(c.onSurface()),
+                toHex(c.surface()),
+                toHex(c.onSurface()),
+                toHex(c.outlineVariant()),
+                toHex(c.surfaceContainerHigh()),
+                toHex(c.primary()),
+                toHex(c.onPrimary()),
+                // alert
+                toHex(c.surface()),
+                toHex(c.outline()),
+                toHex(c.onSurface()),
+                t.bodyMedium(),
+                toHex(c.surface()),
+                toHex(c.primary()),
+                toHex(c.onPrimary()),
+                t.labelLarge(),
+                s.extraSmall(),
+                s.extraSmall(),
+                toHex(darken(c.primary(), 0.1)),
                 // calendar
                 toHex(c.surface()),
                 s.medium(),

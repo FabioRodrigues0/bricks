@@ -1,7 +1,9 @@
 package fabiorodrigues.bricks.components;
 
+import fabiorodrigues.bricks.style.BricksTheme;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.DialogPane;
 
 /**
  * Utilitario para mostrar dialogos de alerta ao utilizador.
@@ -72,7 +74,7 @@ public class Alert {
      * No caso de CONFIRMATION, usa {@link #confirm} para obter a resposta.
      */
     public void show() {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(toAlertType(type));
+        javafx.scene.control.Alert alert = createAlert(toAlertType(type));
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
@@ -120,7 +122,7 @@ public class Alert {
      * @return {@code boolean} — true se o utilizador clicou OK, false se cancelou
      */
     public static boolean confirm(String title, String message) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(AlertType.CONFIRMATION);
+        javafx.scene.control.Alert alert = createAlert(AlertType.CONFIRMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
@@ -136,5 +138,13 @@ public class Alert {
             case ERROR -> AlertType.ERROR;
             case CONFIRMATION -> AlertType.CONFIRMATION;
         };
+    }
+
+    private static javafx.scene.control.Alert createAlert(AlertType type) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(type);
+        DialogPane pane = alert.getDialogPane();
+        pane.getStylesheets().add(BricksTheme.current().toDataUri());
+        pane.getStyleClass().add("bricks-alert");
+        return alert;
     }
 }

@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.fabiorodrigues0</groupId>
     <artifactId>bricks</artifactId>
-    <version>0.7.2</version>
+    <version>0.7.3</version>
     <packaging>jar</packaging>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -40,6 +40,14 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.45.1.0</version>
             <scope>runtime</scope>
+        </dependency>
+        <!-- PDFBox — opcional, so necessario para leitura de PDF via FileReader.
+             Scope provided: quem usa .onPdf() adiciona ao seu projeto. -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
