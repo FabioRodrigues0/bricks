@@ -7,7 +7,11 @@ import javafx.scene.Node;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Componente que abre um dialogo de selecao de ficheiro.
@@ -33,6 +37,7 @@ public class FilePicker implements Component {
     private FileChooser.ExtensionFilter[] filters;
     private Consumer<File> onSelect;
     private State<File> boundState;
+    private Function<File, String> saveTo = null;
     private Modifier modifier;
 
     /**
@@ -108,6 +113,24 @@ public class FilePicker implements Component {
     }
 
     /**
+     * Define uma funcao que calcula o caminho de destino onde o ficheiro sera guardado.
+     * A pasta e criada automaticamente se nao existir.
+     * O callback onSelect recebe o ficheiro destino em vez do original.
+     *
+     * <pre>{@code
+     * .saveTo(file -> "veiculos/" + id + "/" + file.getName())
+     * .saveTo(file -> "documentos/" + tipo + "/" + file.getName())
+     * }</pre>
+     *
+     * @param pathFunction funcao que recebe o ficheiro original e devolve o caminho destino
+     * @return este componente para encadeamento
+     */
+    public FilePicker saveTo(Function<File, String> pathFunction) {
+        this.saveTo = pathFunction;
+        return this;
+    }
+
+    /**
      * Aplica um {@link Modifier} com propriedades visuais reutilizaveis.
      *
      * @param modifier {@code Modifier} — o modifier a aplicar ao botao
@@ -131,11 +154,29 @@ public class FilePicker implements Component {
             }
             File selected = chooser.showOpenDialog(btn.getScene() != null ? btn.getScene().getWindow() : null);
             if (selected != null) {
+                File ficheiro = selected;
+
+                // Copiar para destino se saveTo estiver definido
+                if (saveTo != null) {
+                    try {
+                        String caminhoDestino = saveTo.apply(selected);
+                        Path destino = Path.of(caminhoDestino);
+                        Files.createDirectories(destino.getParent());
+                        Files.copy(selected.toPath(), destino,
+                            StandardCopyOption.REPLACE_EXISTING);
+                        ficheiro = destino.toFile();
+                    } catch (Exception ex) {
+                        System.err.println("[FilePicker] Erro ao guardar ficheiro: "
+                            + ex.getMessage());
+                        // Continua com o ficheiro original se falhar
+                    }
+                }
+
                 if (boundState != null) {
-                    boundState.set(selected);
+                    boundState.set(ficheiro);
                 }
                 if (onSelect != null) {
-                    onSelect.accept(selected);
+                    onSelect.accept(ficheiro);
                 }
             }
         });
