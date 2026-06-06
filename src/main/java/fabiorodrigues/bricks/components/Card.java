@@ -431,15 +431,31 @@ public class Card implements Component {
         }
         if (img.isError() || img.getException() != null) return null;
 
-        javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
-        imgView.setPreserveRatio(coverImagePreserveRatio);
-        imgView.setFitHeight(coverImageHeight);
-        applyCoverClip(imgView);
-
-        if (!coverImagePreserveRatio) {
-            imgView.fitWidthProperty().bind(vbox.widthProperty());
+        if (coverImagePreserveRatio) {
+            javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
+            imgView.setPreserveRatio(true);
+            imgView.setFitHeight(coverImageHeight);
+            applyCoverClip(imgView);
+            return imgView;
         }
-        return imgView;
+
+        javafx.scene.layout.BackgroundSize size = new javafx.scene.layout.BackgroundSize(
+            javafx.scene.layout.BackgroundSize.AUTO,
+            javafx.scene.layout.BackgroundSize.AUTO,
+            true, true, false, true);
+        javafx.scene.layout.BackgroundImage bgImg = new javafx.scene.layout.BackgroundImage(
+            img,
+            javafx.scene.layout.BackgroundRepeat.NO_REPEAT,
+            javafx.scene.layout.BackgroundRepeat.NO_REPEAT,
+            javafx.scene.layout.BackgroundPosition.CENTER,
+            size);
+        javafx.scene.layout.Region region = new javafx.scene.layout.Region();
+        region.setBackground(new javafx.scene.layout.Background(bgImg));
+        region.setMinHeight(coverImageHeight);
+        region.setPrefHeight(coverImageHeight);
+        region.setMaxHeight(coverImageHeight);
+        applyCoverClip(region);
+        return region;
     }
 
     private String resolveCoverImageUrl(String path) {

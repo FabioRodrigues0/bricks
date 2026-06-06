@@ -32,12 +32,15 @@ import java.util.function.Function;
  */
 public class FilePicker implements Component {
 
+    private static final String DEFAULT_BASE_DIR = "src/main/resources";
+
     private String buttonLabel = "Escolher ficheiro...";
     private String dialogTitle = "Selecionar ficheiro";
     private FileChooser.ExtensionFilter[] filters;
     private Consumer<File> onSelect;
     private State<File> boundState;
     private Function<File, String> saveTo = null;
+    private String pathToSave = DEFAULT_BASE_DIR;
     private Modifier modifier;
 
     /**
@@ -113,20 +116,51 @@ public class FilePicker implements Component {
     }
 
     /**
-     * Define uma funcao que calcula o caminho de destino onde o ficheiro sera guardado.
+     * Define uma funcao que calcula o caminho de destino onde o ficheiro sera guardado,
+     * relativo a {@link #pathToSave(String)} (ou {@code src/main/resources} se nao definido).
      * A pasta e criada automaticamente se nao existir.
-     * O callback onSelect recebe o ficheiro destino em vez do original.
+     * O callback {@code onSelect} recebe o ficheiro destino em vez do original.
+     *
+     * <p>Se o caminho devolvido for absoluto, ignora a base definida por {@code pathToSave}.</p>
      *
      * <pre>{@code
+     * // gravado em src/main/resources/veiculos/<id>/<nome>
      * .saveTo(file -> "veiculos/" + id + "/" + file.getName())
-     * .saveTo(file -> "documentos/" + tipo + "/" + file.getName())
+     *
+     * // com base diferente:
+     * .pathToSave(System.getProperty("user.home") + "/.app")
+     * .saveTo(file -> "veiculos/" + id + "/" + file.getName())
+     * // gravado em ~/.app/veiculos/<id>/<nome>
      * }</pre>
      *
      * @param pathFunction funcao que recebe o ficheiro original e devolve o caminho destino
+     *                     (relativo a {@code pathToSave})
      * @return este componente para encadeamento
      */
     public FilePicker saveTo(Function<File, String> pathFunction) {
         this.saveTo = pathFunction;
+        return this;
+    }
+
+    /**
+     * Define a pasta base onde {@link #saveTo(Function)} guarda os ficheiros.
+     * Por defeito {@code src/main/resources} (util em dev — em jar empacotado
+     * passar caminho absoluto como {@code System.getProperty("user.home") + "/.app"}).
+     *
+     * <p>A estrutura de subpastas devolvida pelo {@code saveTo} e mantida.
+     * Este metodo apenas altera a pasta base.</p>
+     *
+     * <pre>{@code
+     * .pathToSave("/var/data/bricks")
+     * .saveTo(file -> "veiculos/" + id + "/" + file.getName())
+     * // gravado em /var/data/bricks/veiculos/<id>/<nome>
+     * }</pre>
+     *
+     * @param baseDir {@code String} — caminho da pasta base (absoluto ou relativo a CWD)
+     * @return este componente para encadeamento
+     */
+    public FilePicker pathToSave(String baseDir) {
+        this.pathToSave = baseDir;
         return this;
     }
 
@@ -156,11 +190,13 @@ public class FilePicker implements Component {
             if (selected != null) {
                 File ficheiro = selected;
 
-                // Copiar para destino se saveTo estiver definido
+                // Copiar para destino se saveTo definido.
+                // saveTo devolve caminho relativo -> resolvido vs pathToSave.
+                // saveTo devolve caminho absoluto -> ignora pathToSave (Path.resolve semantics).
                 if (saveTo != null) {
                     try {
                         String caminhoDestino = saveTo.apply(selected);
-                        Path destino = Path.of(caminhoDestino);
+                        Path destino = Path.of(pathToSave).resolve(caminhoDestino);
                         Files.createDirectories(destino.getParent());
                         Files.copy(selected.toPath(), destino,
                             StandardCopyOption.REPLACE_EXISTING);
@@ -168,7 +204,6 @@ public class FilePicker implements Component {
                     } catch (Exception ex) {
                         System.err.println("[FilePicker] Erro ao guardar ficheiro: "
                             + ex.getMessage());
-                        // Continua com o ficheiro original se falhar
                     }
                 }
 
