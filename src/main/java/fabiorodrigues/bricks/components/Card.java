@@ -439,23 +439,18 @@ public class Card implements Component {
             return imgView;
         }
 
-        javafx.scene.layout.BackgroundSize size = new javafx.scene.layout.BackgroundSize(
-            javafx.scene.layout.BackgroundSize.AUTO,
-            javafx.scene.layout.BackgroundSize.AUTO,
-            true, true, false, true);
-        javafx.scene.layout.BackgroundImage bgImg = new javafx.scene.layout.BackgroundImage(
-            img,
-            javafx.scene.layout.BackgroundRepeat.NO_REPEAT,
-            javafx.scene.layout.BackgroundRepeat.NO_REPEAT,
-            javafx.scene.layout.BackgroundPosition.CENTER,
-            size);
-        javafx.scene.layout.Region region = new javafx.scene.layout.Region();
-        region.setBackground(new javafx.scene.layout.Background(bgImg));
-        region.setMinHeight(coverImageHeight);
-        region.setPrefHeight(coverImageHeight);
-        region.setMaxHeight(coverImageHeight);
-        applyCoverClip(region);
-        return region;
+        javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
+        imgView.setPreserveRatio(true);
+        imgView.setFitHeight(coverImageHeight);
+
+        javafx.scene.layout.StackPane wrapper = new javafx.scene.layout.StackPane(imgView);
+        wrapper.setAlignment(javafx.geometry.Pos.CENTER);
+        wrapper.setMinHeight(coverImageHeight);
+        wrapper.setPrefHeight(coverImageHeight);
+        wrapper.setMaxHeight(coverImageHeight);
+        wrapper.setStyle("-fx-background-color: #e5e7eb;");
+        applyCoverClip(wrapper);
+        return wrapper;
     }
 
     private String resolveCoverImageUrl(String path) {
