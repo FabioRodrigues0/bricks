@@ -439,23 +439,42 @@ public class Card implements Component {
             return imgView;
         }
 
-        javafx.scene.layout.BackgroundSize size = new javafx.scene.layout.BackgroundSize(
-            javafx.scene.layout.BackgroundSize.AUTO,
-            javafx.scene.layout.BackgroundSize.AUTO,
-            true, true, false, true);
-        javafx.scene.layout.BackgroundImage bgImg = new javafx.scene.layout.BackgroundImage(
-            img,
-            javafx.scene.layout.BackgroundRepeat.NO_REPEAT,
-            javafx.scene.layout.BackgroundRepeat.NO_REPEAT,
-            javafx.scene.layout.BackgroundPosition.CENTER,
-            size);
-        javafx.scene.layout.Region region = new javafx.scene.layout.Region();
-        region.setBackground(new javafx.scene.layout.Background(bgImg));
-        region.setMinHeight(coverImageHeight);
-        region.setPrefHeight(coverImageHeight);
-        region.setMaxHeight(coverImageHeight);
-        applyCoverClip(region);
-        return region;
+        javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
+
+        Runnable updateViewport = () -> {
+            double slotW = vbox.getWidth();
+            double slotH = coverImageHeight;
+            double imgW = img.getWidth();
+            double imgH = img.getHeight();
+            if (slotW <= 0 || imgW <= 0 || imgH <= 0) return;
+            double slotRatio = slotW / slotH;
+            double imgRatio = imgW / imgH;
+            double vpW, vpH;
+            if (imgRatio > slotRatio) {
+                vpH = imgH;
+                vpW = imgH * slotRatio;
+            } else {
+                vpW = imgW;
+                vpH = imgW / slotRatio;
+            }
+            double vpX = (imgW - vpW) / 2;
+            double vpY = (imgH - vpH) / 2;
+            imgView.setViewport(new javafx.geometry.Rectangle2D(vpX, vpY, vpW, vpH));
+            imgView.setFitWidth(slotW);
+            imgView.setFitHeight(slotH);
+        };
+
+        vbox.widthProperty().addListener((obs, o, n) -> updateViewport.run());
+        if (img.getProgress() >= 1) {
+            updateViewport.run();
+        } else {
+            img.progressProperty().addListener((obs, o, n) -> {
+                if (n.doubleValue() >= 1) updateViewport.run();
+            });
+        }
+
+        applyCoverClip(imgView);
+        return imgView;
     }
 
     private String resolveCoverImageUrl(String path) {
