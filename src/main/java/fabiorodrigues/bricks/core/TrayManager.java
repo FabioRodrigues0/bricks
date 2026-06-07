@@ -8,10 +8,7 @@ import java.awt.AWTException;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
-import java.awt.Toolkit;
 import java.awt.TrayIcon;
-import java.awt.image.BufferedImage;
-import java.net.URL;
 
 /**
  * Gere o icone na system tray e as notificacoes nativas do OS via AWT.
@@ -49,23 +46,41 @@ public class TrayManager {
      * @param appTitle {@code String} — titulo da app para o menu de contexto
      */
     public void init(Stage stage, String iconPath, String tooltip, String appTitle) {
+        init(stage, iconPath, tooltip, appTitle, null, null);
+    }
+
+    /**
+     * Inicializa o tray icon com labels personalizados para o menu nativo.
+     *
+     * @param stage     {@link Stage} — a janela principal da app
+     * @param iconPath  {@code String} — caminho do icone no classpath, ficheiro ou URL
+     * @param tooltip   {@code String} — texto ao passar o rato no icone
+     * @param appTitle  {@code String} — titulo da app para fallback dos labels
+     * @param openLabel {@code String} — texto do item abrir (null usa "Abrir {appTitle}")
+     * @param exitLabel {@code String} — texto do item sair (null usa "Sair")
+     */
+    public void init(Stage stage, String iconPath, String tooltip, String appTitle,
+                     String openLabel, String exitLabel) {
         if (!SystemTray.isSupported()) return;
 
         this.stage = stage;
-        Toolkit.getDefaultToolkit();
 
-        java.awt.Image icon = carregarIcone(iconPath);
+        java.awt.Image icon = AppIconLoader.loadAwtImage(iconPath);
 
         PopupMenu menu = new PopupMenu();
 
-        MenuItem abrirItem = new MenuItem("Abrir " + appTitle);
+        String resolvedTitle = isBlank(appTitle) ? "App" : appTitle;
+        String resolvedOpenLabel = isBlank(openLabel) ? "Abrir " + resolvedTitle : openLabel;
+        String resolvedExitLabel = isBlank(exitLabel) ? "Sair" : exitLabel;
+
+        MenuItem abrirItem = new MenuItem(resolvedOpenLabel);
         abrirItem.addActionListener(e -> Platform.runLater(() -> {
             stage.show();
             stage.setIconified(false);
             stage.toFront();
         }));
 
-        MenuItem sairItem = new MenuItem("Sair");
+        MenuItem sairItem = new MenuItem(resolvedExitLabel);
         sairItem.addActionListener(e -> {
             SystemTray.getSystemTray().remove(trayIcon);
             Platform.exit();
@@ -133,15 +148,7 @@ public class TrayManager {
         return trayIcon != null;
     }
 
-    private java.awt.Image carregarIcone(String path) {
-        try {
-            URL url = getClass().getResource(path);
-            if (url != null) {
-                return Toolkit.getDefaultToolkit().getImage(url);
-            }
-        } catch (Exception ignored) {
-            // fallback
-        }
-        return new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 }

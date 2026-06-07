@@ -56,8 +56,11 @@ public abstract class BricksApplication extends Application {
     private double height = 600;
     private Stage stage;
     private BricksScene currentScene = null;
+    private String appIconPath = null;
     private String trayIconPath = null;
     private String trayTooltip = "Bricks App";
+    private String trayOpenLabel = null;
+    private String trayExitLabel = null;
     private boolean minimizeToTray = false;
 
     /**
@@ -130,11 +133,13 @@ public abstract class BricksApplication extends Application {
         applyThemeToScene(scene);
         stage.setScene(scene);
         stage.setTitle(title);
+        applyWindowIcon(stage);
         stage.show();
 
         if (trayIconPath != null) {
             Platform.setImplicitExit(false);
-            TrayManager.getInstance().init(stage, trayIconPath, trayTooltip, title);
+            TrayManager.getInstance().init(stage, trayIconPath, trayTooltip, title,
+                trayOpenLabel, trayExitLabel);
             stage.setOnCloseRequest(e -> {
                 e.consume();
                 stage.hide();
@@ -158,6 +163,20 @@ public abstract class BricksApplication extends Application {
      */
     protected void setTrayIcon(String imagePath) {
         this.trayIconPath = imagePath;
+        if (this.appIconPath == null) {
+            this.appIconPath = imagePath;
+        }
+    }
+
+    /**
+     * Define o icone da janela da aplicacao.
+     * Aceita recurso do classpath (ex: {@code "/images/logo.png"}), ficheiro
+     * relativo/absoluto ou URL.
+     *
+     * @param imagePath {@code String} — caminho da imagem
+     */
+    protected void setAppIcon(String imagePath) {
+        this.appIconPath = imagePath;
     }
 
     /**
@@ -167,6 +186,18 @@ public abstract class BricksApplication extends Application {
      */
     protected void setTrayTooltip(String tooltip) {
         this.trayTooltip = tooltip;
+    }
+
+    /**
+     * Personaliza os textos do menu nativo da system tray.
+     * O aspeto visual do menu e controlado pelo sistema operativo.
+     *
+     * @param openLabel texto do item que reabre a janela
+     * @param exitLabel texto do item que termina a aplicacao
+     */
+    protected void setTrayMenuLabels(String openLabel, String exitLabel) {
+        this.trayOpenLabel = openLabel;
+        this.trayExitLabel = exitLabel;
     }
 
     /**
@@ -187,6 +218,13 @@ public abstract class BricksApplication extends Application {
         container.getChildren().add(node != null ? node : new Pane());
         for (Runnable listener : List.copyOf(rerenderListeners)) {
             listener.run();
+        }
+    }
+
+    private void applyWindowIcon(Stage stage) {
+        javafx.scene.image.Image icon = AppIconLoader.loadFxImage(appIconPath);
+        if (icon != null) {
+            stage.getIcons().setAll(icon);
         }
     }
 
