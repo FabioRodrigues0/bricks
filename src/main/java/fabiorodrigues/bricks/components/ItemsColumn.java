@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.function.Function;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -175,20 +176,14 @@ public class ItemsColumn<T> implements Component {
             return emptyState != null ? emptyState.render() : new VBox();
         }
 
-        VBox container = new VBox(gap);
-        container.setPadding(new Insets(padding));
-
-        if (modifier != null) {
-            modifier.applyTo(container);
-        }
-
-        if (lista == null || lista.isEmpty()) {
-            return container;
-        }
-
         int cols = Math.max(1, columns);
 
         if (cols == 1) {
+            VBox container = new VBox(gap);
+            container.setPadding(new Insets(padding));
+            if (modifier != null) {
+                modifier.applyTo(container);
+            }
             for (T item : lista) {
                 Node node = itemTemplate.apply(item).render();
                 if (node == null) {
@@ -197,35 +192,39 @@ public class ItemsColumn<T> implements Component {
                 applyItemHeight(node);
                 container.getChildren().add(node);
             }
-        } else {
-            for (int i = 0; i < lista.size(); i += cols) {
-                HBox row = new HBox(gap);
-                int end = Math.min(i + cols, lista.size());
-                for (int j = i; j < end; j++) {
-                    Node node = itemTemplate.apply(lista.get(j)).render();
-                    if (node == null) {
-                        continue;
-                    }
-                    if (node instanceof Region region) {
-                        region.setMaxWidth(Double.MAX_VALUE);
-                    }
-                    applyItemHeight(node);
-                    HBox.setHgrow(node, Priority.ALWAYS);
-                    row.getChildren().add(node);
-                }
-                if (row.getChildren().isEmpty()) {
-                    continue;
-                }
-                for (int k = row.getChildren().size(); k < cols; k++) {
-                    Region filler = new Region();
-                    HBox.setHgrow(filler, Priority.ALWAYS);
-                    row.getChildren().add(filler);
-                }
-                container.getChildren().add(row);
-            }
+            return container;
         }
 
-        return container;
+        GridPane grid = new GridPane();
+        grid.setHgap(gap);
+        grid.setVgap(gap);
+        grid.setPadding(new Insets(padding));
+        if (modifier != null) {
+            modifier.applyTo(grid);
+        }
+
+        for (int c = 0; c < cols; c++) {
+            ColumnConstraints cc = new ColumnConstraints();
+            cc.setPercentWidth(100.0 / cols);
+            cc.setHgrow(Priority.ALWAYS);
+            grid.getColumnConstraints().add(cc);
+        }
+
+        for (int i = 0; i < lista.size(); i++) {
+            Node node = itemTemplate.apply(lista.get(i)).render();
+            if (node == null) {
+                continue;
+            }
+            if (node instanceof Region region) {
+                region.setMaxWidth(Double.MAX_VALUE);
+            }
+            applyItemHeight(node);
+            GridPane.setHgrow(node, Priority.ALWAYS);
+            GridPane.setFillWidth(node, true);
+            grid.add(node, i % cols, i / cols);
+        }
+
+        return grid;
     }
 
     private void applyItemHeight(Node node) {
