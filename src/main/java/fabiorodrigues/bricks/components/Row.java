@@ -8,6 +8,8 @@ import java.util.List;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 
 /**
  * Layout horizontal. Dispoe os filhos da esquerda para a direita.
@@ -105,6 +107,9 @@ public class Row implements Component {
         for (Component child : children) {
             Node node = child.render();
             if (node != null) {
+                if (node instanceof Region region && region.getMaxWidth() == Double.MAX_VALUE) {
+                    HBox.setHgrow(node, Priority.ALWAYS);
+                }
                 hbox.getChildren().add(node);
             }
         }

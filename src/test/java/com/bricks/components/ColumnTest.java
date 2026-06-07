@@ -5,8 +5,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.bricks.JavaFXInit;
 import fabiorodrigues.bricks.components.Column;
 import fabiorodrigues.bricks.components.Text;
+import fabiorodrigues.bricks.core.Component;
 import fabiorodrigues.bricks.style.Modifier;
 import javafx.scene.Node;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -64,5 +67,20 @@ class ColumnTest {
 
         VBox inner = (VBox) outer.getChildren().get(0);
         assertEquals(1, inner.getChildren().size());
+    }
+
+    @Test
+    void deveAplicarVgrowQuandoFilhoTemMaxHeightInfinito() {
+        Component fillChild = () -> {
+            Region region = new Region();
+            region.setMaxHeight(Double.MAX_VALUE);
+            return region;
+        };
+
+        VBox vbox = (VBox) new Column()
+            .children(fillChild)
+            .render();
+
+        assertEquals(Priority.ALWAYS, VBox.getVgrow(vbox.getChildren().get(0)));
     }
 }

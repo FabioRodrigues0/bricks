@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 /**
@@ -105,6 +107,9 @@ public class Column implements Component {
         for (Component child : children) {
             Node node = child.render();
             if (node != null) {
+                if (node instanceof Region region && region.getMaxHeight() == Double.MAX_VALUE) {
+                    VBox.setVgrow(node, Priority.ALWAYS);
+                }
                 vbox.getChildren().add(node);
             }
         }

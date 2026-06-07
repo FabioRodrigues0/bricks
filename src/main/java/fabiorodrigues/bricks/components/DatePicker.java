@@ -96,6 +96,7 @@ public class DatePicker implements Component {
             labelNode.getStyleClass().add("bricks-label");
             VBox container = new VBox(4, labelNode, picker);
             container.setFillWidth(true);
+            LayoutUtils.applyExpansionToWrapper(picker, container);
             return container;
         }
 

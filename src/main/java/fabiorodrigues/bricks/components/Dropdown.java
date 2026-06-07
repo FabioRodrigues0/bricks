@@ -138,6 +138,7 @@ public class Dropdown<T> implements Component {
             Label labelNode = new Label(label);
             VBox container = new VBox(4, labelNode, comboBox);
             container.setFillWidth(true);
+            LayoutUtils.applyExpansionToWrapper(comboBox, container);
             return container;
         }
 

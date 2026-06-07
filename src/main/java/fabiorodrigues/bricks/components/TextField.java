@@ -392,6 +392,7 @@ public class TextField implements Component {
             Label labelNode = new Label(label);
             VBox container = new VBox(4, labelNode, control);
             container.setFillWidth(true);
+            LayoutUtils.applyExpansionToWrapper(control, container);
             return container;
         }
 
