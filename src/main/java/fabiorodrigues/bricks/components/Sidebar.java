@@ -29,6 +29,7 @@ public class Sidebar implements Component {
     private String logoPath = null;
     private Component logoComponent = null;
     private final List<SidebarItem> items = new ArrayList<>();
+    private final List<SidebarItem> bottomItems = new ArrayList<>();
     private Modifier modifier;
     private State<Boolean> sidebarAberta;
 
@@ -75,6 +76,18 @@ public class Sidebar implements Component {
     }
 
     /**
+     * Adiciona um item fixado no fundo da sidebar.
+     * Util para opcoes como definicoes, perfil ou logout.
+     *
+     * @param item o item a adicionar no fundo
+     * @return este componente para encadeamento
+     */
+    public Sidebar bottomItem(SidebarItem item) {
+        this.bottomItems.add(item);
+        return this;
+    }
+
+    /**
      * Aplica um {@link Modifier} com propriedades visuais adicionais.
      *
      * @param modifier o modifier a aplicar
@@ -109,23 +122,17 @@ public class Sidebar implements Component {
         }
 
         for (SidebarItem item : items) {
-            if (!aberta && !item.hasIcon()) continue;
+            Node btn = renderItem(item, aberta);
+            if (btn != null) col.children(() -> btn);
+        }
 
-            javafx.scene.control.Button btn = new javafx.scene.control.Button();
-            btn.getStyleClass().add("bricks-sidebar-item");
-            btn.setMaxWidth(Double.MAX_VALUE);
-            btn.setAlignment(aberta ? Pos.CENTER_LEFT : Pos.CENTER);
-            btn.setOnAction(e -> item.getOnClick().run());
-
-            if (item.hasIcon()) {
-                btn.setGraphic(new Icon(item.getIconCode()).size(16).render());
+        if (!bottomItems.isEmpty()) {
+            col.children(new Spacer());
+            col.children(new Divider());
+            for (SidebarItem item : bottomItems) {
+                Node btn = renderItem(item, aberta);
+                if (btn != null) col.children(() -> btn);
             }
-            if (aberta) {
-                btn.setText(item.getLabel());
-            }
-
-            VBox.setMargin(btn, new Insets(2, 8, 2, 8));
-            col.children(() -> btn);
         }
 
         Node sidebarNode = col.render();
@@ -136,5 +143,25 @@ public class Sidebar implements Component {
         }
 
         return sidebarNode;
+    }
+
+    private Node renderItem(SidebarItem item, boolean aberta) {
+        if (!aberta && !item.hasIcon()) return null;
+
+        javafx.scene.control.Button btn = new javafx.scene.control.Button();
+        btn.getStyleClass().add("bricks-sidebar-item");
+        btn.setMaxWidth(Double.MAX_VALUE);
+        btn.setAlignment(aberta ? Pos.CENTER_LEFT : Pos.CENTER);
+        btn.setOnAction(e -> item.getOnClick().run());
+
+        if (item.hasIcon()) {
+            btn.setGraphic(new Icon(item.getIconCode()).size(16).render());
+        }
+        if (aberta) {
+            btn.setText(item.getLabel());
+        }
+
+        VBox.setMargin(btn, new Insets(2, 8, 2, 8));
+        return btn;
     }
 }
