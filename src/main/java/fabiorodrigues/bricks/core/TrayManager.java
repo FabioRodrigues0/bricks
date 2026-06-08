@@ -9,9 +9,11 @@ import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
+import java.io.IOException;
+import java.util.Locale;
 
 /**
- * Gere o icone na system tray e as notificacoes nativas do OS via AWT.
+ * Gere o icone na system tray e as notificacoes nativas do OS.
  * Singleton — inicializado pelo {@link BricksApplication} quando
  * {@code setTrayIcon()} e chamado.
  *
@@ -23,6 +25,8 @@ public class TrayManager {
     private static TrayManager instance;
     private TrayIcon trayIcon;
     private Stage stage;
+    private String appTitle = "App";
+    private boolean initializedForNotifications;
 
     private TrayManager() {}
 
@@ -61,15 +65,17 @@ public class TrayManager {
      */
     public void init(Stage stage, String iconPath, String tooltip, String appTitle,
                      String openLabel, String exitLabel) {
-        if (!SystemTray.isSupported()) return;
-
         this.stage = stage;
+        this.appTitle = isBlank(appTitle) ? "App" : appTitle;
+        this.initializedForNotifications = true;
+
+        if (!SystemTray.isSupported()) return;
 
         java.awt.Image icon = AppIconLoader.loadAwtImage(iconPath);
 
         PopupMenu menu = new PopupMenu();
 
-        String resolvedTitle = isBlank(appTitle) ? "App" : appTitle;
+        String resolvedTitle = this.appTitle;
         String resolvedOpenLabel = isBlank(openLabel) ? "Abrir " + resolvedTitle : openLabel;
         String resolvedExitLabel = isBlank(exitLabel) ? "Sair" : exitLabel;
 
@@ -109,8 +115,9 @@ public class TrayManager {
     }
 
     /**
-     * Mostra uma notificacao nativa do OS via tray icon.
-     * No-op se o tray nao foi inicializado.
+     * Mostra uma notificacao nativa do OS.
+     * No macOS usa o Notification Center via osascript; nos restantes sistemas
+     * usa o tray icon AWT. No-op se o tray/notificacoes nao foram inicializados.
      *
      * @param titulo   {@code String} — titulo da notificacao
      * @param mensagem {@code String} — corpo da mensagem
@@ -118,6 +125,11 @@ public class TrayManager {
      */
     public void showNotification(String titulo, String mensagem,
                                   NotificationType tipo) {
+        if (isMacOs()) {
+            showMacNotification(titulo, mensagem, tipo);
+            return;
+        }
+
         if (trayIcon == null) return;
 
         TrayIcon.MessageType awtTipo = switch (tipo) {
@@ -129,6 +141,22 @@ public class TrayManager {
         trayIcon.displayMessage(titulo, mensagem, awtTipo);
     }
 
+    private void showMacNotification(String titulo, String mensagem,
+                                      NotificationType tipo) {
+        if (!initializedForNotifications) return;
+
+        String script = "display notification " + toAppleScriptString(mensagem)
+            + " with title " + toAppleScriptString(resolveNotificationTitle(titulo))
+            + " subtitle " + toAppleScriptString(toMacSubtitle(tipo));
+
+        try {
+            new ProcessBuilder("osascript", "-e", script).start();
+        } catch (IOException e) {
+            System.err.println("[TrayManager] Nao foi possivel mostrar notificacao macOS: "
+                + e.getMessage());
+        }
+    }
+
     /**
      * Remove o icone da tray.
      */
@@ -137,6 +165,7 @@ public class TrayManager {
             SystemTray.getSystemTray().remove(trayIcon);
             trayIcon = null;
         }
+        initializedForNotifications = false;
     }
 
     /**
@@ -150,5 +179,35 @@ public class TrayManager {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private boolean isMacOs() {
+        return isMacOsName(System.getProperty("os.name", ""));
+    }
+
+    private String resolveNotificationTitle(String title) {
+        return isBlank(title) ? appTitle : title;
+    }
+
+    static boolean isMacOsName(String osName) {
+        return osName != null && osName.toLowerCase(Locale.ROOT).contains("mac");
+    }
+
+    static String toAppleScriptString(String value) {
+        if (value == null) return "\"\"";
+
+        String escaped = value
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"");
+        return "\"" + escaped + "\"";
+    }
+
+    static String toMacSubtitle(NotificationType tipo) {
+        return switch (tipo) {
+            case SUCCESS -> "Sucesso";
+            case INFO    -> "Informacao";
+            case WARNING -> "Aviso";
+            case ERROR   -> "Erro";
+        };
     }
 }
