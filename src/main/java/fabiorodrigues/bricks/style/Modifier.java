@@ -51,7 +51,10 @@ public class Modifier {
     private Color gradientTo = null;
     private double gradientAngle = 135;
     private Color borderColor;
-    private double borderWidth = -1;
+    private double borderTopWidth = -1;
+    private double borderRightWidth = -1;
+    private double borderBottomWidth = -1;
+    private double borderLeftWidth = -1;
     private double borderRadius = -1;
     private double opacity = -1;
     private boolean visible = true;
@@ -350,8 +353,87 @@ public class Modifier {
      */
     public Modifier border(Color color, double width) {
         this.borderColor = color;
-        this.borderWidth = width;
+        setBorderWidths(width, width, width, width);
         return this;
+    }
+
+    /**
+     * Define uma borda com espessura individual para cada lado.
+     *
+     * <pre>{@code
+     * new Modifier().border(Color.GRAY, 0, 0, 1, 0) // apenas em baixo
+     * }</pre>
+     *
+     * @param color {@code Color} — cor da borda (ex: Color.GRAY, Color.web("#cccccc"))
+     * @param top {@code double} — espessura da borda superior em pixels
+     * @param right {@code double} — espessura da borda direita em pixels
+     * @param bottom {@code double} — espessura da borda inferior em pixels
+     * @param left {@code double} — espessura da borda esquerda em pixels
+     * @return este modifier para encadeamento
+     */
+    public Modifier border(Color color, double top, double right, double bottom, double left) {
+        this.borderColor = color;
+        setBorderWidths(top, right, bottom, left);
+        return this;
+    }
+
+    /**
+     * Define borda apenas no lado superior.
+     *
+     * @param color {@code Color} — cor da borda
+     * @param width {@code double} — espessura da borda em pixels
+     * @return este modifier para encadeamento
+     */
+    public Modifier borderTop(Color color, double width) {
+        return border(color, width, 0, 0, 0);
+    }
+
+    /**
+     * Define borda apenas no lado direito.
+     *
+     * @param color {@code Color} — cor da borda
+     * @param width {@code double} — espessura da borda em pixels
+     * @return este modifier para encadeamento
+     */
+    public Modifier borderRight(Color color, double width) {
+        return border(color, 0, width, 0, 0);
+    }
+
+    /**
+     * Define borda apenas no lado inferior.
+     *
+     * @param color {@code Color} — cor da borda
+     * @param width {@code double} — espessura da borda em pixels
+     * @return este modifier para encadeamento
+     */
+    public Modifier borderBottom(Color color, double width) {
+        return border(color, 0, 0, width, 0);
+    }
+
+    /**
+     * Define borda apenas no lado esquerdo.
+     *
+     * @param color {@code Color} — cor da borda
+     * @param width {@code double} — espessura da borda em pixels
+     * @return este modifier para encadeamento
+     */
+    public Modifier borderLeft(Color color, double width) {
+        return border(color, 0, 0, 0, width);
+    }
+
+    private void setBorderWidths(double top, double right, double bottom, double left) {
+        this.borderTopWidth = top;
+        this.borderRightWidth = right;
+        this.borderBottomWidth = bottom;
+        this.borderLeftWidth = left;
+    }
+
+    private boolean hasBorder() {
+        return borderColor != null
+            && borderTopWidth >= 0
+            && borderRightWidth >= 0
+            && borderBottomWidth >= 0
+            && borderLeftWidth >= 0;
     }
 
     /**
@@ -499,12 +581,13 @@ public class Modifier {
             css.append(String.format(java.util.Locale.US, "-fx-border-radius: %.1f;", borderRadius));
         }
 
-        if (borderColor != null && borderWidth >= 0) {
-            css.append(String.format("-fx-border-color: #%02x%02x%02x;",
-                (int) (borderColor.getRed() * 255),
-                (int) (borderColor.getGreen() * 255),
-                (int) (borderColor.getBlue() * 255)));
-            css.append(String.format(java.util.Locale.US, "-fx-border-width: %.1f;", borderWidth));
+        if (hasBorder()) {
+            css.append(String.format("-fx-border-color: %s;", toHex(borderColor)));
+            css.append(String.format(java.util.Locale.US, "-fx-border-width: %.1f %.1f %.1f %.1f;",
+                borderTopWidth,
+                borderRightWidth,
+                borderBottomWidth,
+                borderLeftWidth));
         }
 
         // propriedades de texto como inline CSS (ganha sobre stylesheets do tema)

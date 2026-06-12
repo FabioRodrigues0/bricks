@@ -106,6 +106,34 @@ class ModifierTest {
     }
 
     @Test
+    void deveAplicarBordaUniforme() {
+        Modifier mod = new Modifier().border(Color.GRAY, 1);
+        VBox vbox = new VBox();
+        mod.applyTo(vbox);
+
+        assertTrue(vbox.getStyle().contains("-fx-border-color: #808080"));
+        assertTrue(vbox.getStyle().contains("-fx-border-width: 1.0 1.0 1.0 1.0"));
+    }
+
+    @Test
+    void deveAplicarBordaIndividualPorLado() {
+        Modifier mod = new Modifier().border(Color.GRAY, 0, 0, 1, 0);
+        VBox vbox = new VBox();
+        mod.applyTo(vbox);
+
+        assertTrue(vbox.getStyle().contains("-fx-border-width: 0.0 0.0 1.0 0.0"));
+    }
+
+    @Test
+    void deveAplicarBordaApenasNoLadoEsquerdo() {
+        Modifier mod = new Modifier().borderLeft(Color.GRAY, 2);
+        VBox vbox = new VBox();
+        mod.applyTo(vbox);
+
+        assertTrue(vbox.getStyle().contains("-fx-border-width: 0.0 0.0 0.0 2.0"));
+    }
+
+    @Test
     void deveSuportarEncadeamento() {
         Modifier mod = new Modifier()
             .padding(10)
