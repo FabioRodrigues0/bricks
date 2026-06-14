@@ -1118,20 +1118,51 @@ public class BricksTheme {
         .date-picker-popup .spinner .button:hover {
             -fx-background-color: %s;
         }
-        .date-picker-popup .spinner .label,
-        .date-picker-popup .day-name-cell,
-        .date-picker-popup .week-number-cell {
+        .date-picker-popup .spinner .button .left-arrow,
+        .date-picker-popup .spinner .button .right-arrow {
+            -fx-background-color: %s;
+        }
+        .date-picker-popup .spinner .label {
             -fx-text-fill: %s;
+        }
+        .date-picker-popup .calendar-grid {
+            -fx-background-color: %s;
+        }
+        .date-picker-popup .day-name-cell {
+            -fx-background-color: %s;
+            -fx-text-fill: %s;
+            -fx-border-color: %s;
+        }
+        .date-picker-popup .week-number-cell {
+            -fx-background-color: %s;
+            -fx-text-fill: %s;
+            -fx-border-color: %s;
         }
         .date-picker-popup .day-cell {
             -fx-background-color: %s;
             -fx-text-fill: %s;
             -fx-border-color: %s;
         }
+        .date-picker-popup .day-cell.previous-month,
+        .date-picker-popup .day-cell.next-month {
+            -fx-opacity: 0.55;
+        }
         .date-picker-popup .day-cell:hover {
             -fx-background-color: %s;
         }
+        .date-picker-popup .day-cell:focused {
+            -fx-background-color: %s;
+        }
+        .date-picker-popup .day-cell.today {
+            -fx-border-color: %s;
+            -fx-border-width: 1;
+        }
         .date-picker-popup .day-cell:selected {
+            -fx-background-color: %s;
+            -fx-text-fill: %s;
+        }
+        .date-picker-popup .day-cell:selected:hover,
+        .date-picker-popup .day-cell:selected:focused {
             -fx-background-color: %s;
             -fx-text-fill: %s;
         }
@@ -1369,14 +1400,26 @@ public class BricksTheme {
                 toHex(c.outline()),
                 s.extraSmall(),
                 s.extraSmall(),
-                toHex(c.surface()),
+                toHex(c.surfaceContainerHigh()),
                 toHex(c.onSurface()),
                 toHex(c.surfaceContainerHigh()),
                 toHex(c.onSurface()),
+                toHex(c.onSurface()),
+                toHex(c.outlineVariant()),
+                toHex(c.surfaceContainerHigh()),
+                toHex(c.onSurfaceVariant()),
+                toHex(c.outlineVariant()),
+                toHex(c.surfaceContainerHigh()),
+                toHex(c.onSurfaceVariant()),
+                toHex(c.outlineVariant()),
                 toHex(c.surface()),
                 toHex(c.onSurface()),
                 toHex(c.outlineVariant()),
                 toHex(c.surfaceContainerHigh()),
+                toHex(c.surfaceContainerHigh()),
+                toHex(c.primary()),
+                toHex(c.primary()),
+                toHex(c.onPrimary()),
                 toHex(c.primary()),
                 toHex(c.onPrimary()),
                 // alert
