@@ -80,6 +80,31 @@ public abstract class BricksApplication extends Application {
     }
 
     /**
+     * Define a pasta base para ficheiros fornecidos pelo utilizador.
+     * Recursos internos da app continuam a ser carregados pelo classpath
+     * com caminhos iniciados por {@code /}, por exemplo {@code /logo.png}.
+     *
+     * <pre>{@code
+     * setPathUserData(System.getProperty("user.home") + "/.minha-app/uploads");
+     * }</pre>
+     *
+     * @param path {@code String} — caminho absoluto ou relativo ao diretorio atual
+     */
+    public void setPathUserData(String path) {
+        BricksPaths.setPathUserData(path);
+    }
+
+    /**
+     * Define a pasta base para ficheiros fornecidos pelo utilizador.
+     * Alias de {@link #setPathUserData(String)}.
+     *
+     * @param path {@code String} — caminho absoluto ou relativo ao diretorio atual
+     */
+    public void setUserDataPath(String path) {
+        setPathUserData(path);
+    }
+
+    /**
      * Define o tamanho da janela.
      *
      * @param width {@code double} — a largura da janela

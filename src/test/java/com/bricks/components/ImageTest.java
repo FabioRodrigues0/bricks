@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.bricks.JavaFXInit;
 import fabiorodrigues.bricks.components.Image;
+import fabiorodrigues.bricks.core.BricksPaths;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,5 +44,19 @@ class ImageTest {
             .render();
 
         assertTrue(view.getImage().isBackgroundLoading());
+    }
+
+    @Test
+    void deveCarregarImagemRelativaAUserData() throws IOException {
+        Path dir = Files.createTempDirectory("bricks-user-data-test");
+        Path file = dir.resolve("clientes/1/foto.png");
+        Files.createDirectories(file.getParent());
+        Files.write(file, PNG_1X1);
+        BricksPaths.setPathUserData(dir.toString());
+
+        ImageView view = (ImageView) Image.userData("clientes/1/foto.png").render();
+
+        assertEquals(file.toUri().toString(), view.getImage().getUrl());
+        assertFalse(view.getImage().isBackgroundLoading());
     }
 }

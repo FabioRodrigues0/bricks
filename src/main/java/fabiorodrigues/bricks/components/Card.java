@@ -1,6 +1,7 @@
 package fabiorodrigues.bricks.components;
 
 import fabiorodrigues.bricks.core.Component;
+import fabiorodrigues.bricks.core.BricksPaths;
 import fabiorodrigues.bricks.style.Modifier;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -64,9 +65,11 @@ public class Card implements Component {
     private double cornerRadius = 8;
     private Runnable onClick;
     private String coverImagePath = null;
+    private boolean coverImageUserData = false;
     private double coverImageHeight = 160;
     private boolean coverImagePreserveRatio = false;
     private String coverPlaceholderPath = null;
+    private boolean coverPlaceholderUserData = false;
     private Component coverPlaceholderComponent = null;
 
     /**
@@ -260,6 +263,27 @@ public class Card implements Component {
      */
     public Card coverImage(String imagePath, double height) {
         this.coverImagePath = imagePath;
+        this.coverImageUserData = false;
+        this.coverImageHeight = height;
+        return this;
+    }
+
+    /**
+     * Define uma imagem de capa relativa a pasta configurada por
+     * {@code BricksApplication#setPathUserData(String)}.
+     *
+     * <pre>{@code
+     * new Card()
+     *     .coverImageUserData("clientes/1/foto.png", 160)
+     * }</pre>
+     *
+     * @param imagePath caminho relativo a user data ou caminho absoluto
+     * @param height    altura da imagem em pixels
+     * @return este componente para encadeamento
+     */
+    public Card coverImageUserData(String imagePath, double height) {
+        this.coverImagePath = imagePath;
+        this.coverImageUserData = true;
         this.coverImageHeight = height;
         return this;
     }
@@ -290,6 +314,20 @@ public class Card implements Component {
      */
     public Card coverPlaceholder(String imagePath) {
         this.coverPlaceholderPath = imagePath;
+        this.coverPlaceholderUserData = false;
+        this.coverPlaceholderComponent = null;
+        return this;
+    }
+
+    /**
+     * Define uma imagem de fallback relativa a pasta de user data.
+     *
+     * @param imagePath caminho relativo a user data ou caminho absoluto
+     * @return este componente para encadeamento
+     */
+    public Card coverPlaceholderUserData(String imagePath) {
+        this.coverPlaceholderPath = imagePath;
+        this.coverPlaceholderUserData = true;
         this.coverPlaceholderComponent = null;
         return this;
     }
@@ -376,12 +414,12 @@ public class Card implements Component {
         }
 
         if (hasCoverSlot) {
-            Node coverNode = buildCoverImage(coverImagePath, vbox);
+            Node coverNode = buildCoverImage(coverImagePath, coverImageUserData, vbox);
             if (coverNode == null) {
                 if (coverPlaceholderComponent != null) {
                     coverNode = buildCoverFromComponent(coverPlaceholderComponent.render());
                 } else if (coverPlaceholderPath != null) {
-                    coverNode = buildCoverImage(coverPlaceholderPath, vbox);
+                    coverNode = buildCoverImage(coverPlaceholderPath, coverPlaceholderUserData, vbox);
                 }
             }
             if (coverNode != null) vbox.getChildren().add(coverNode);
@@ -419,8 +457,8 @@ public class Card implements Component {
         return vbox;
     }
 
-    private Node buildCoverImage(String path, VBox vbox) {
-        String resolvedUrl = resolveCoverImageUrl(path);
+    private Node buildCoverImage(String path, boolean userData, VBox vbox) {
+        String resolvedUrl = resolveCoverImageUrl(path, userData);
         if (resolvedUrl == null) return null;
 
         javafx.scene.image.Image img;
@@ -477,8 +515,12 @@ public class Card implements Component {
         return imgView;
     }
 
-    private String resolveCoverImageUrl(String path) {
+    private String resolveCoverImageUrl(String path, boolean userData) {
         if (path == null || path.isBlank()) return null;
+
+        if (userData) {
+            return BricksPaths.resolveUserData(path).toUri().toString();
+        }
 
         java.io.File file = new java.io.File(path);
         if (file.exists() && file.isFile()) {

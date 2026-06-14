@@ -1,6 +1,7 @@
 package fabiorodrigues.bricks.components;
 
 import fabiorodrigues.bricks.core.Component;
+import fabiorodrigues.bricks.core.BricksPaths;
 import fabiorodrigues.bricks.style.Modifier;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
@@ -13,6 +14,7 @@ import javafx.scene.image.ImageView;
  * new Image("https://exemplo.com/foto.png")
  * new Image("file:/caminho/para/foto.png")
  * new Image("/imagens/logo.png") // recurso no classpath
+ * new Image("clientes/1/foto.png").userData() // relativo a setPathUserData(...)
  * }</pre>
  *
  * <p>Com dimensoes definidas:</p>
@@ -28,6 +30,7 @@ public class Image implements Component {
     private double height = -1;
     private boolean preserveRatio = true;
     private Boolean backgroundLoading;
+    private boolean userData;
     private Modifier modifier;
 
     /**
@@ -37,6 +40,17 @@ public class Image implements Component {
      */
     public Image(String url) {
         this.url = url;
+    }
+
+    /**
+     * Cria uma imagem relativa a pasta configurada por
+     * {@link fabiorodrigues.bricks.core.BricksApplication#setPathUserData(String)}.
+     *
+     * @param path caminho relativo a user data ou caminho absoluto
+     * @return componente de imagem
+     */
+    public static Image userData(String path) {
+        return new Image(path).userData();
     }
 
     /**
@@ -99,6 +113,22 @@ public class Image implements Component {
     }
 
     /**
+     * Interpreta o caminho desta imagem como relativo a pasta de user data.
+     * Se o caminho for absoluto, e usado diretamente.
+     *
+     * <pre>{@code
+     * new Image("clientes/1/foto.png").userData()
+     * Image.userData("clientes/1/foto.png")
+     * }</pre>
+     *
+     * @return este componente para encadeamento
+     */
+    public Image userData() {
+        this.userData = true;
+        return this;
+    }
+
+    /**
      * Aplica um {@link Modifier} com propriedades visuais reutilizaveis.
      *
      * @param modifier o modifier a aplicar
@@ -127,6 +157,10 @@ public class Image implements Component {
     }
 
     private String resolveUrl() {
+        if (userData) {
+            return BricksPaths.resolveUserData(url).toUri().toString();
+        }
+
         if (!url.startsWith("/")) {
             return url;
         }

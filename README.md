@@ -449,6 +449,31 @@ new FilePicker()
     .onSelect(ficheiro -> caminho.set(ficheiro.getAbsolutePath()))
 ```
 
+### Imagens da app e do utilizador
+
+```java
+{
+    setTitle("Clientes");
+    setPathUserData(System.getProperty("user.home") + "/.clientes-app/uploads");
+}
+
+// Imagem interna da app: src/main/resources/logo.png
+new Image("/logo.png").width(120);
+
+// Guarda imagem escolhida pelo utilizador em ~/.clientes-app/uploads/clientes/<id>/<nome>
+new FilePicker()
+    .title("Escolher foto")
+    .filter("Imagens", "*.png", "*.jpg", "*.jpeg")
+    .pathToUserData()
+    .saveTo(file -> "clientes/" + id + "/" + file.getName());
+
+// Carrega imagem relativa a pasta configurada por setPathUserData(...)
+Image.userData("clientes/" + id + "/foto.png").size(64);
+
+new Card()
+    .coverImageUserData("clientes/" + id + "/foto.png", 160);
+```
+
 ---
 
 ## Modifier

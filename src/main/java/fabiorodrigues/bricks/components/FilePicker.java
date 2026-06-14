@@ -1,6 +1,7 @@
 package fabiorodrigues.bricks.components;
 
 import fabiorodrigues.bricks.core.Component;
+import fabiorodrigues.bricks.core.BricksPaths;
 import fabiorodrigues.bricks.core.State;
 import fabiorodrigues.bricks.style.Modifier;
 import javafx.scene.Node;
@@ -41,6 +42,7 @@ public class FilePicker implements Component {
     private State<File> boundState;
     private Function<File, String> saveTo = null;
     private String pathToSave = DEFAULT_BASE_DIR;
+    private boolean saveToUserData = false;
     private Modifier modifier;
 
     /**
@@ -161,6 +163,26 @@ public class FilePicker implements Component {
      */
     public FilePicker pathToSave(String baseDir) {
         this.pathToSave = baseDir;
+        this.saveToUserData = false;
+        return this;
+    }
+
+    /**
+     * Define que {@link #saveTo(Function)} deve guardar ficheiros na pasta
+     * configurada por {@code BricksApplication#setPathUserData(String)}.
+     *
+     * <pre>{@code
+     * setPathUserData(System.getProperty("user.home") + "/.minha-app/uploads");
+     *
+     * new FilePicker()
+     *     .pathToUserData()
+     *     .saveTo(file -> "clientes/" + id + "/" + file.getName())
+     * }</pre>
+     *
+     * @return este componente para encadeamento
+     */
+    public FilePicker pathToUserData() {
+        this.saveToUserData = true;
         return this;
     }
 
@@ -196,7 +218,9 @@ public class FilePicker implements Component {
                 if (saveTo != null) {
                     try {
                         String caminhoDestino = saveTo.apply(selected);
-                        Path destino = Path.of(pathToSave).resolve(caminhoDestino);
+                        Path destino = saveToUserData
+                            ? BricksPaths.resolveUserData(caminhoDestino)
+                            : Path.of(pathToSave).resolve(caminhoDestino);
                         Files.createDirectories(destino.getParent());
                         Files.copy(selected.toPath(), destino,
                             StandardCopyOption.REPLACE_EXISTING);
