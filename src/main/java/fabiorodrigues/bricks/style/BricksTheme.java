@@ -1423,10 +1423,12 @@ public class BricksTheme {
         return String.format(java.util.Locale.US, """
 
         /* ---- Sidebar ---- */
+        .bricks-sidebar {
+            -fx-border-width: 0 1 0 0;
+            -fx-border-color: %s;
+        }
         .bricks-sidebar-item {
             -fx-background-color: transparent;
-            -fx-border-color: %s;
-            -fx-border-width: 1;
             -fx-cursor: hand;
             -fx-padding: 10 12 10 12;
             -fx-background-radius: %.0f;
@@ -1461,11 +1463,8 @@ public class BricksTheme {
         /* ---- Icon button (toggle, etc) ---- */
         .bricks-icon-button {
             -fx-background-color: transparent;
-            -fx-border-color: %s;
-            -fx-border-width: 1;
             -fx-cursor: hand;
             -fx-background-radius: %.0f;
-            -fx-border-radius: %.0f;
             -fx-padding: 8;
             -fx-text-fill: %s;
         }
@@ -1476,7 +1475,7 @@ public class BricksTheme {
             -fx-background-color: %s;
         }
         """,
-            toHex(c.onSurface()),                    // sidebar-item border
+            toHex(c.outlineVariant()),               // sidebar border
             s.small(), s.small(),                    // sidebar-item radius
             toHex(c.onSurface()),                    // sidebar-item text
             t.bodyMedium(),                          // sidebar-item font-size
@@ -1486,8 +1485,7 @@ public class BricksTheme {
             s.small(), s.small(),                    // navbar-item radius
             toHex(c.onSurface()),                    // navbar-item text
             toHex(c.surfaceContainerHigh()),         // navbar-item hover
-            toHex(c.onSurface()),                    // icon-button border
-            s.small(), s.small(),                    // icon-button radius
+            s.small(),                               // icon-button radius
             toHex(c.onSurface()),                    // icon-button text
             toHex(c.onSurface()),                    // icon-button icon
             toHex(c.surfaceContainerHigh())          // icon-button hover
