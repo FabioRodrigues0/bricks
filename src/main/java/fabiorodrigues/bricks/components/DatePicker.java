@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import javafx.application.Platform;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.control.skin.DatePickerSkin;
 import javafx.scene.layout.VBox;
 
@@ -92,8 +91,7 @@ public class DatePicker implements Component {
         }
 
         if (label != null) {
-            Label labelNode = (Label) new Text(label).render();
-            labelNode.getStyleClass().add("bricks-label");
+            Node labelNode = new Text(label).styleClass("bricks-label").render();
             VBox container = new VBox(4, labelNode, picker);
             container.setFillWidth(true);
             LayoutUtils.applyExpansionToWrapper(picker, container);

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.skin.ComboBoxListViewSkin;
 import javafx.scene.layout.VBox;
@@ -135,7 +134,7 @@ public class Dropdown<T> implements Component {
         }
 
         if (label != null) {
-            Label labelNode = new Label(label);
+            Node labelNode = new Text(label).styleClass("bricks-label").render();
             VBox container = new VBox(4, labelNode, comboBox);
             container.setFillWidth(true);
             LayoutUtils.applyExpansionToWrapper(comboBox, container);

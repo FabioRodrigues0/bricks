@@ -6,7 +6,6 @@ import fabiorodrigues.bricks.style.Modifier;
 import java.util.function.Consumer;
 import javafx.application.Platform;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyEvent;
@@ -389,7 +388,7 @@ public class TextField implements Component {
         }
 
         if (label != null) {
-            Label labelNode = new Label(label);
+            Node labelNode = new Text(label).styleClass("bricks-label").render();
             VBox container = new VBox(4, labelNode, control);
             container.setFillWidth(true);
             LayoutUtils.applyExpansionToWrapper(control, container);

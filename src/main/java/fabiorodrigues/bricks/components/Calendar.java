@@ -2,6 +2,7 @@ package fabiorodrigues.bricks.components;
 
 import fabiorodrigues.bricks.core.Component;
 import fabiorodrigues.bricks.core.State;
+import fabiorodrigues.bricks.style.BricksTheme;
 import fabiorodrigues.bricks.style.Modifier;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -346,7 +347,9 @@ public class Calendar implements Component {
             .gap(8)
             .modifier(new Modifier().alignment(Pos.CENTER_LEFT))
             .children(
-                new Icon("far-calendar-alt").size(15),
+                new Icon("far-calendar-alt")
+                    .size(15)
+                    .color(BricksTheme.current().colorScheme().onSurface()),
                 new Text(dataFormatada).fontSize(15).bold()
             );
 
@@ -545,6 +548,7 @@ public class Calendar implements Component {
     private javafx.scene.control.Button calendarIconButton(String icon, String tooltip, boolean enabled, Runnable action) {
         javafx.scene.control.Button button = (javafx.scene.control.Button) new IconButton(icon)
             .ghost()
+            .color(BricksTheme.current().colorScheme().onSurface())
             .enabled(enabled)
             .tooltip(tooltip)
             .onClick(action)

@@ -858,6 +858,9 @@ public class BricksTheme {
             -fx-text-fill: %s;
             -fx-font-size: %.0fpx;
         }
+        .label.bricks-label {
+            -fx-text-fill: %s;
+        }
 
         /* ---- TextField ---- */
         .text-field.bricks-text-field {
@@ -1277,6 +1280,7 @@ public class BricksTheme {
                 // text
                 toHex(c.onBackground()),
                 t.bodyMedium(),
+                toHex(c.onSurface()),
                 // text-field
                 toHex(c.surface()),
                 toHex(c.onSurface()),
