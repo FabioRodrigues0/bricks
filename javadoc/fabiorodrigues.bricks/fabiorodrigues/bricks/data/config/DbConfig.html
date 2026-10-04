@@ -93,19 +93,20 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>Direct Known Subclasses:</dt>
-<dd><code><a href="MySQLConfig.html" title="class in fabiorodrigues.bricks.data.config">MySQLConfig</a></code>, <code><a href="PostgreSQLConfig.html" title="class in fabiorodrigues.bricks.data.config">PostgreSQLConfig</a></code>, <code><a href="SQLiteConfig.html" title="class in fabiorodrigues.bricks.data.config">SQLiteConfig</a></code></dd>
+<dd><code><a href="MySQLConfig.html" title="class in fabiorodrigues.bricks.data.config">MySQLConfig</a></code>, <code><a href="PostgreSQLConfig.html" title="class in fabiorodrigues.bricks.data.config">PostgreSQLConfig</a></code>, <code><a href="SQLiteConfig.html" title="class in fabiorodrigues.bricks.data.config">SQLiteConfig</a></code>, <code><a href="SQLServerConfig.html" title="class in fabiorodrigues.bricks.data.config">SQLServerConfig</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public abstract class </span><span class="element-name type-name-label">DbConfig</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Contrato de configuracao de base de dados.
- Cada implementacao define a URL de ligacao, driver JDBC e sintaxe especifica.
+ Cada implementacao define a URL de ligacao, driver JDBC e o <a href="../dialect/SqlDialect.html" title="interface in fabiorodrigues.bricks.data.dialect"><code>SqlDialect</code></a> a usar.
 
  <p>Implementacoes disponiveis:</p>
  <ul>
    <li><a href="SQLiteConfig.html" title="class in fabiorodrigues.bricks.data.config"><code>SQLiteConfig</code></a> — padrao, sem configuracao necessaria</li>
    <li><a href="MySQLConfig.html" title="class in fabiorodrigues.bricks.data.config"><code>MySQLConfig</code></a> — host, porta, base de dados, user, password</li>
    <li><a href="PostgreSQLConfig.html" title="class in fabiorodrigues.bricks.data.config"><code>PostgreSQLConfig</code></a> — host, porta, base de dados, user, password</li>
+   <li><a href="SQLServerConfig.html" title="class in fabiorodrigues.bricks.data.config"><code>SQLServerConfig</code></a> — SQL Server em Docker ou Azure SQL Database</li>
  </ul></div>
 </section>
 <section class="summary">
@@ -128,16 +129,16 @@ loadScripts(document, 'script');</script>
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#autoIncrementSyntax()" class="member-name-link">autoIncrementSyntax</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="../dialect/SqlDialect.html" title="interface in fabiorodrigues.bricks.data.dialect">SqlDialect</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#dialect()" class="member-name-link">dialect</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Sintaxe para o campo auto-incremento no CREATE TABLE.</div>
+<div class="block">Dialeto SQL desta base de dados (paginacao, upsert, tipos, aspas).</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getDriver()" class="member-name-link">getDriver</a>()</code></div>
@@ -159,22 +160,10 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Utilizador para autenticacao.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#limitSyntax(int,int)" class="member-name-link">limitSyntax</a><wbr>(int&nbsp;limit,
- int&nbsp;offset)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Clausula LIMIT/OFFSET no dialeto desta base de dados.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#onConflictSyntax(java.lang.String%5B%5D,java.lang.String)" class="member-name-link">onConflictSyntax</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;updateFields,
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;conflictTarget)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Gera a clausula de upsert para os campos indicados.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#supportsOnDuplicateKey()" class="member-name-link">supportsOnDuplicateKey</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Indica se a base de dados suporta upsert via clausula de conflito.</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#keepConnectionOpen()" class="member-name-link">keepConnectionOpen</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Indica se a ligacao deve ficar aberta e partilhada entre queries.</div>
 </div>
 </div>
 </div>
@@ -252,56 +241,26 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="limitSyntax(int,int)">
-<h3>limitSyntax</h3>
-<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">limitSyntax</span><wbr><span class="parameters">(int&nbsp;limit,
- int&nbsp;offset)</span></div>
-<div class="block">Clausula LIMIT/OFFSET no dialeto desta base de dados.</div>
+<section class="detail" id="dialect()">
+<h3>dialect</h3>
+<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="../dialect/SqlDialect.html" title="interface in fabiorodrigues.bricks.data.dialect">SqlDialect</a></span>&nbsp;<span class="element-name">dialect</span>()</div>
+<div class="block">Dialeto SQL desta base de dados (paginacao, upsert, tipos, aspas).</div>
 <dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>limit</code> - numero maximo de linhas</dd>
-<dd><code>offset</code> - numero de linhas a saltar</dd>
 <dt>Returns:</dt>
-<dd>a clausula SQL gerada</dd>
+<dd>o dialeto</dd>
 </dl>
 </section>
 </li>
 <li>
-<section class="detail" id="autoIncrementSyntax()">
-<h3>autoIncrementSyntax</h3>
-<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">autoIncrementSyntax</span>()</div>
-<div class="block">Sintaxe para o campo auto-incremento no CREATE TABLE.</div>
+<section class="detail" id="keepConnectionOpen()">
+<h3>keepConnectionOpen</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">keepConnectionOpen</span>()</div>
+<div class="block">Indica se a ligacao deve ficar aberta e partilhada entre queries.
+ Com <code>false</code>, cada query abre e fecha a sua ligacao — necessario em bases
+ serverless (Azure SQL) que so entram em pausa sem ligacoes abertas.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>a definicao de coluna auto-incremento (ex: <code>INTEGER PRIMARY KEY AUTOINCREMENT</code>)</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="supportsOnDuplicateKey()">
-<h3>supportsOnDuplicateKey</h3>
-<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">supportsOnDuplicateKey</span>()</div>
-<div class="block">Indica se a base de dados suporta upsert via clausula de conflito.
- SQLite usa <code>INSERT OR REPLACE</code> como prefixo em vez de clausula.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>true se suportar clausula de conflito pos-VALUES</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="onConflictSyntax(java.lang.String[],java.lang.String)">
-<h3>onConflictSyntax</h3>
-<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">onConflictSyntax</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;updateFields,
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;conflictTarget)</span></div>
-<div class="block">Gera a clausula de upsert para os campos indicados.
- Chamado apenas quando <a href="#supportsOnDuplicateKey()"><code>supportsOnDuplicateKey()</code></a> e true.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>updateFields</code> - campos a atualizar em caso de conflito</dd>
-<dd><code>conflictTarget</code> - campo de conflito (necessario para PostgreSQL, ignorado pelo MySQL)</dd>
-<dt>Returns:</dt>
-<dd>a clausula SQL gerada</dd>
+<dd>true para manter uma ligacao partilhada (padrao)</dd>
 </dl>
 </section>
 </li>

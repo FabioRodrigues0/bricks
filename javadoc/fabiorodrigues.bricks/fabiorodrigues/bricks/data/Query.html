@@ -115,6 +115,7 @@ loadScripts(document, 'script');</script>
      .insertInto("alunos")
      .values(Map.of("nome", "Fabio", "turma", 1))
      .onDuplicateUpdate("nome", "turma")
+     .conflictOn("id")
      .execute();
  </code></pre>
 
@@ -135,15 +136,28 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#column(java.lang.String,fabiorodrigues.bricks.data.dialect.ColumnType)" class="member-name-link">column</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
+ <a href="dialect/ColumnType.html" title="enum class in fabiorodrigues.bricks.data.dialect">ColumnType</a>&nbsp;type)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adiciona uma coluna ao CREATE TABLE com tipo portavel entre bases de dados.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#column(java.lang.String,fabiorodrigues.bricks.data.dialect.ColumnType,java.lang.String)" class="member-name-link">column</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
+ <a href="dialect/ColumnType.html" title="enum class in fabiorodrigues.bricks.data.dialect">ColumnType</a>&nbsp;type,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;constraints)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adiciona uma coluna ao CREATE TABLE com tipo portavel e restricoes.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#column(java.lang.String,java.lang.String)" class="member-name-link">column</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;definition)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Adiciona uma coluna ao CREATE TABLE.</div>
+<div class="block">Adiciona uma coluna ao CREATE TABLE com definicao SQL raw (especifica do dialeto).</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#conflictOn(java.lang.String)" class="member-name-link">conflictOn</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;field)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#conflictOn(java.lang.String...)" class="member-name-link">conflictOn</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>...&nbsp;fields)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Define o campo de conflito para upsert no PostgreSQL.</div>
+<div class="block">Define os campos de conflito para upsert.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#createTableIfNotExists(java.lang.String)" class="member-name-link">createTableIfNotExists</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;table)</code></div>
@@ -232,59 +246,66 @@ loadScripts(document, 'script');</script>
 <div class="block">Define a ordenacao do resultado.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#select(java.lang.String...)" class="member-name-link">select</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>...&nbsp;columns)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#raw(java.lang.String,java.lang.Object...)" class="member-name-link">raw</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sql,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;params)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Define SQL escrito a mao, para o que o builder nao cobre (<code>GROUP BY</code>, <code>HAVING</code>,
+ subqueries, <code>OR</code>, ...).</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#select(java.lang.String...)" class="member-name-link">select</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>...&nbsp;columns)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Define as colunas a selecionar.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#set(java.util.Map)" class="member-name-link">set</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;&nbsp;values)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#set(java.util.Map)" class="member-name-link">set</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;&nbsp;values)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Define os valores a atualizar.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#union(fabiorodrigues.bricks.data.Query)" class="member-name-link">union</a><wbr>(<a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a>&nbsp;other)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#union(fabiorodrigues.bricks.data.Query)" class="member-name-link">union</a><wbr>(<a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a>&nbsp;other)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adiciona um UNION com outra query — remove duplicados.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#unionAll(fabiorodrigues.bricks.data.Query)" class="member-name-link">unionAll</a><wbr>(<a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a>&nbsp;other)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#unionAll(fabiorodrigues.bricks.data.Query)" class="member-name-link">unionAll</a><wbr>(<a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a>&nbsp;other)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adiciona um UNION ALL com outra query — mantem duplicados.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#update(java.lang.String)" class="member-name-link">update</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;table)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#update(java.lang.String)" class="member-name-link">update</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;table)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Inicia um UPDATE na tabela indicada.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#value(java.lang.String,java.lang.Object)" class="member-name-link">value</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;field,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#value(java.lang.String,java.lang.Object)" class="member-name-link">value</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;field,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;val)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adiciona um par campo-valor ao INSERT ou UPDATE, de forma individual e legivel.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#values(java.util.Map)" class="member-name-link">values</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;&nbsp;values)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#values(java.util.Map)" class="member-name-link">values</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" title="class or interface in java.util" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&gt;&nbsp;values)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Define os valores a inserir.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#when(boolean,java.util.function.UnaryOperator)" class="member-name-link">when</a><wbr>(boolean&nbsp;condition,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#when(boolean,java.util.function.UnaryOperator)" class="member-name-link">when</a><wbr>(boolean&nbsp;condition,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/UnaryOperator.html" title="class or interface in java.util.function" class="external-link">UnaryOperator</a>&lt;<a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a>&gt;&nbsp;block)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Bloco condicional — aplica operacoes ao query apenas se a condicao for verdadeira.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#where(java.lang.String,fabiorodrigues.bricks.data.WhereOperator,java.lang.Object)" class="member-name-link">where</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;field,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#where(java.lang.String,fabiorodrigues.bricks.data.WhereOperator,java.lang.Object)" class="member-name-link">where</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;field,
  <a href="WhereOperator.html" title="enum class in fabiorodrigues.bricks.data">WhereOperator</a>&nbsp;operator,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adiciona uma condicao WHERE com <a href="WhereOperator.html" title="enum class in fabiorodrigues.bricks.data"><code>WhereOperator</code></a> type-safe.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#where(java.lang.String,java.lang.String,java.lang.Object)" class="member-name-link">where</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;field,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#where(java.lang.String,java.lang.String,java.lang.Object)" class="member-name-link">where</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;field,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;operator,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adiciona uma condicao WHERE com operador em <code>String</code>.</div>
 </div>
 </div>
@@ -448,10 +469,11 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="limit(int)">
 <h3>limit</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></span>&nbsp;<span class="element-name">limit</span><wbr><span class="parameters">(int&nbsp;n)</span></div>
-<div class="block">Limita o numero de linhas devolvidas.</div>
+<div class="block">Limita o numero de linhas devolvidas. Apenas para SELECT.
+ Em SQL Server, paginar sem <a href="#orderBy(java.lang.String,java.lang.String)"><code>orderBy(java.lang.String, java.lang.String)</code></a> da ordem indefinida.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>n</code> - <code>int</code> — numero maximo de linhas</dd>
+<dd><code>n</code> - <code>int</code> — numero maximo de linhas (<code>&gt;= 1</code>)</dd>
 <dt>Returns:</dt>
 <dd>esta query para encadeamento</dd>
 </dl>
@@ -461,7 +483,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="offset(int)">
 <h3>offset</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></span>&nbsp;<span class="element-name">offset</span><wbr><span class="parameters">(int&nbsp;n)</span></div>
-<div class="block">Define o offset (numero de linhas a saltar).</div>
+<div class="block">Define o offset (numero de linhas a saltar). Apenas para SELECT.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>n</code> - <code>int</code> — numero de linhas a saltar</dd>
@@ -560,6 +582,38 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="raw(java.lang.String,java.lang.Object...)">
+<h3>raw</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></span>&nbsp;<span class="element-name">raw</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sql,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;params)</span></div>
+<div class="block">Define SQL escrito a mao, para o que o builder nao cobre (<code>GROUP BY</code>, <code>HAVING</code>,
+ subqueries, <code>OR</code>, ...). Os valores vao por <code>?</code>, pela ordem de <code>params</code>.
+ O SQL nao e traduzido entre dialetos.
+
+ <pre><code>
+ List&lt;TurmaTotal&gt; totais = DB.query()
+     .raw("SELECT turma, COUNT(*) AS total FROM alunos WHERE nome LIKE ? GROUP BY turma HAVING COUNT(*) &gt; ?",
+          "J%", 2)
+     .execute(TurmaTotal.class);
+
+ int afetados = DB.query()
+     .raw("UPDATE alunos SET turma = turma + 1 WHERE turma &lt; ?", 3)
+     .execute();
+ </code></pre>
+
+ <p>Executar com <a href="#execute(java.lang.Class)"><code>execute(Class)</code></a> ou <a href="#executeRaw()"><code>executeRaw()</code></a> se devolver linhas,
+ ou com <a href="#execute()"><code>execute()</code></a> / <a href="#executeResult()"><code>executeResult()</code></a> caso contrario
+ (num INSERT devolve o id gerado).</p></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>sql</code> - <code>String</code> — SQL completo com <code>?</code> nos valores</dd>
+<dd><code>params</code> - <code>Object...</code> — valores dos <code>?</code>, por ordem</dd>
+<dt>Returns:</dt>
+<dd>esta query para encadeamento</dd>
+</dl>
+</section>
+</li>
+<li>
 <section class="detail" id="insertInto(java.lang.String)">
 <h3>insertInto</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></span>&nbsp;<span class="element-name">insertInto</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;table)</span></div>
@@ -620,25 +674,28 @@ loadScripts(document, 'script');</script>
 <h3>onDuplicateUpdate</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></span>&nbsp;<span class="element-name">onDuplicateUpdate</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>...&nbsp;fields)</span></div>
 <div class="block">Ativa upsert — em caso de chave duplicada, atualiza os campos indicados.
- Em SQLite usa <code>INSERT OR REPLACE</code>; em MySQL usa <code>ON DUPLICATE KEY UPDATE</code>;
- em PostgreSQL usa <code>ON CONFLICT ... DO UPDATE SET</code> (ver <a href="#conflictOn(java.lang.String)"><code>conflictOn(String)</code></a>).</div>
+ Em SQLite e PostgreSQL usa <code>ON CONFLICT ... DO UPDATE SET</code>; em MySQL usa
+ <code>ON DUPLICATE KEY UPDATE</code>; em SQL Server usa <code>MERGE</code> (ver <a href="#conflictOn(java.lang.String...)"><code>conflictOn(String...)</code></a>).
+
+ <p>Em SQL Server nao se insere valor explicito numa coluna <code>IDENTITY</code>: fazer upsert
+ por uma chave natural (<code>numero</code>, <code>email</code>).</p></div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>fields</code> - <code>String...</code> — campos a atualizar em caso de conflito</dd>
+<dd><code>fields</code> - <code>String...</code> — campos a atualizar em caso de conflito (nenhum = ignorar o conflito)</dd>
 <dt>Returns:</dt>
 <dd>esta query para encadeamento</dd>
 </dl>
 </section>
 </li>
 <li>
-<section class="detail" id="conflictOn(java.lang.String)">
+<section class="detail" id="conflictOn(java.lang.String...)">
 <h3>conflictOn</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></span>&nbsp;<span class="element-name">conflictOn</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;field)</span></div>
-<div class="block">Define o campo de conflito para upsert no PostgreSQL.
- Ignorado por MySQL e SQLite.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></span>&nbsp;<span class="element-name">conflictOn</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>...&nbsp;fields)</span></div>
+<div class="block">Define os campos de conflito para upsert.
+ Obrigatorio em SQL Server e PostgreSQL; opcional em SQLite; ignorado por MySQL.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>field</code> - <code>String</code> — campo com UNIQUE constraint que define o conflito</dd>
+<dd><code>fields</code> - <code>String...</code> — campos com PK/UNIQUE que definem o conflito</dd>
 <dt>Returns:</dt>
 <dd>esta query para encadeamento</dd>
 </dl>
@@ -692,9 +749,9 @@ loadScripts(document, 'script');</script>
  <pre><code>
  DB.query()
      .createTableIfNotExists("alunos")
-     .column("id", "INTEGER PRIMARY KEY AUTOINCREMENT")
-     .column("nome", "TEXT NOT NULL")
-     .column("turma", "INTEGER")
+     .column("id", ColumnType.ID)
+     .column("nome", ColumnType.STRING, "NOT NULL")
+     .column("turma", ColumnType.INTEGER)
      .execute();
  </code></pre></div>
 <dl class="notes">
@@ -710,11 +767,47 @@ loadScripts(document, 'script');</script>
 <h3>column</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></span>&nbsp;<span class="element-name">column</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;definition)</span></div>
-<div class="block">Adiciona uma coluna ao CREATE TABLE.</div>
+<div class="block">Adiciona uma coluna ao CREATE TABLE com definicao SQL raw (especifica do dialeto).</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>name</code> - <code>String</code> — nome da coluna</dd>
 <dd><code>definition</code> - <code>String</code> — definicao SQL (ex: <code>"TEXT NOT NULL"</code>, <code>"INTEGER DEFAULT 0"</code>)</dd>
+<dt>Returns:</dt>
+<dd>esta query para encadeamento</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="column(java.lang.String,fabiorodrigues.bricks.data.dialect.ColumnType)">
+<h3>column</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></span>&nbsp;<span class="element-name">column</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
+ <a href="dialect/ColumnType.html" title="enum class in fabiorodrigues.bricks.data.dialect">ColumnType</a>&nbsp;type)</span></div>
+<div class="block">Adiciona uma coluna ao CREATE TABLE com tipo portavel entre bases de dados.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>name</code> - <code>String</code> — nome da coluna</dd>
+<dd><code>type</code> - <code>ColumnType</code> — tipo portavel (ex: <code>ColumnType.STRING</code>)</dd>
+<dt>Returns:</dt>
+<dd>esta query para encadeamento</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="column(java.lang.String,fabiorodrigues.bricks.data.dialect.ColumnType,java.lang.String)">
+<h3>column</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></span>&nbsp;<span class="element-name">column</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
+ <a href="dialect/ColumnType.html" title="enum class in fabiorodrigues.bricks.data.dialect">ColumnType</a>&nbsp;type,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;constraints)</span></div>
+<div class="block">Adiciona uma coluna ao CREATE TABLE com tipo portavel e restricoes.
+
+ <pre><code>
+ .column("numero", ColumnType.STRING, "NOT NULL UNIQUE")
+ </code></pre></div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>name</code> - <code>String</code> — nome da coluna</dd>
+<dd><code>type</code> - <code>ColumnType</code> — tipo portavel</dd>
+<dd><code>constraints</code> - <code>String</code> — restricoes SQL (ex: <code>"NOT NULL"</code>, <code>"DEFAULT 0"</code>)</dd>
 <dt>Returns:</dt>
 <dd>esta query para encadeamento</dd>
 </dl>

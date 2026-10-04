@@ -168,7 +168,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.sql/java/sql/Connection.html" title="class or interface in java.sql" class="external-link">Connection</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getConnection()" class="member-name-link">getConnection</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Devolve a conexao ativa, criando uma nova se nao existir ou tiver fechado.</div>
+<div class="block">Devolve a conexao partilhada, criando uma nova se nao existir ou tiver fechado.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="Query.html" title="class in fabiorodrigues.bricks.data">Query</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#query()" class="member-name-link">query</a>()</code></div>
@@ -211,9 +211,11 @@ loadScripts(document, 'script');</script>
 <h3>getConnection</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.sql/java/sql/Connection.html" title="class or interface in java.sql" class="external-link">Connection</a></span>&nbsp;<span class="element-name">getConnection</span>()
                                 throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.sql/java/sql/SQLException.html" title="class or interface in java.sql" class="external-link">SQLException</a></span></div>
-<div class="block">Devolve a conexao ativa, criando uma nova se nao existir ou tiver fechado.
- A conexao e partilhada entre todas as queries — e reutilizada em vez de abrir
- uma nova a cada <code>execute()</code>.</div>
+<div class="block">Devolve a conexao partilhada, criando uma nova se nao existir ou tiver fechado.
+ Ligacoes transitorias do Azure (base a acordar) sao repetidas ate 3 vezes.
+
+ <p>Nota: ignora <a href="config/DbConfig.html#keepConnectionOpen()"><code>DbConfig.keepConnectionOpen()</code></a> — a conexao fica aberta ate ao
+ proximo <a href="#configure(fabiorodrigues.bricks.data.config.DbConfig)"><code>configure(fabiorodrigues.bricks.data.config.DbConfig)</code></a>. As queries do <a href="Query.html" title="class in fabiorodrigues.bricks.data"><code>Query</code></a> respeitam essa politica.</p></div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>a conexao JDBC ativa</dd>

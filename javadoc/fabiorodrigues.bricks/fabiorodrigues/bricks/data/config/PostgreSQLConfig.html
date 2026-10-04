@@ -113,7 +113,7 @@ loadScripts(document, 'script');</script>
      .insertInto("alunos")
      .values(Map.of("id", 1, "nome", "Fabio"))
      .onDuplicateUpdate("nome")
-     .conflictOn("id")   // necessario no PostgreSQL
+     .conflictOn("id")   // necessario no PostgreSQL e SQL Server
      .execute();
  </code></pre>
 
@@ -145,15 +145,15 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#autoIncrementSyntax()" class="member-name-link">autoIncrementSyntax</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="PostgreSQLConfig.html" title="class in fabiorodrigues.bricks.data.config">PostgreSQLConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#database(java.lang.String)" class="member-name-link">database</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;database)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Sintaxe para o campo auto-incremento no CREATE TABLE.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="PostgreSQLConfig.html" title="class in fabiorodrigues.bricks.data.config">PostgreSQLConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#database(java.lang.String)" class="member-name-link">database</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;database)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Define o nome da base de dados.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../dialect/SqlDialect.html" title="interface in fabiorodrigues.bricks.data.dialect">SqlDialect</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#dialect()" class="member-name-link">dialect</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Dialeto SQL desta base de dados (paginacao, upsert, tipos, aspas).</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDriver()" class="member-name-link">getDriver</a>()</code></div>
@@ -180,18 +180,6 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Define o host do servidor PostgreSQL.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#limitSyntax(int,int)" class="member-name-link">limitSyntax</a><wbr>(int&nbsp;limit,
- int&nbsp;offset)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Clausula LIMIT/OFFSET no dialeto desta base de dados.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onConflictSyntax(java.lang.String%5B%5D,java.lang.String)" class="member-name-link">onConflictSyntax</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;updateFields,
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;conflictTarget)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Gera a clausula de upsert para os campos indicados.</div>
-</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="PostgreSQLConfig.html" title="class in fabiorodrigues.bricks.data.config">PostgreSQLConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#password(java.lang.String)" class="member-name-link">password</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;password)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -202,19 +190,17 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Define a porta do servidor PostgreSQL.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#supportsOnDuplicateKey()" class="member-name-link">supportsOnDuplicateKey</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="PostgreSQLConfig.html" title="class in fabiorodrigues.bricks.data.config">PostgreSQLConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#user(java.lang.String)" class="member-name-link">user</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;user)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Indica se a base de dados suporta upsert via clausula de conflito.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="PostgreSQLConfig.html" title="class in fabiorodrigues.bricks.data.config">PostgreSQLConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#user(java.lang.String)" class="member-name-link">user</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;user)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Define o utilizador de autenticacao.</div>
 </div>
 </div>
 </div>
 </div>
+<div class="inherited-list">
+<h3 id="methods-inherited-from-class-fabiorodrigues.bricks.data.config.DbConfig">Methods inherited from class&nbsp;fabiorodrigues.bricks.data.config.<a href="DbConfig.html" title="class in fabiorodrigues.bricks.data.config">DbConfig</a></h3>
+<code><a href="DbConfig.html#keepConnectionOpen()">keepConnectionOpen</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;java.lang.<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#toString()" title="class or interface in java.lang" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
@@ -365,68 +351,16 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="limitSyntax(int,int)">
-<h3>limitSyntax</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">limitSyntax</span><wbr><span class="parameters">(int&nbsp;limit,
- int&nbsp;offset)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from class:&nbsp;<code><a href="DbConfig.html#limitSyntax(int,int)">DbConfig</a></code></span></div>
-<div class="block">Clausula LIMIT/OFFSET no dialeto desta base de dados.</div>
+<section class="detail" id="dialect()">
+<h3>dialect</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../dialect/SqlDialect.html" title="interface in fabiorodrigues.bricks.data.dialect">SqlDialect</a></span>&nbsp;<span class="element-name">dialect</span>()</div>
+<div class="block"><span class="description-from-type-label">Description copied from class:&nbsp;<code><a href="DbConfig.html#dialect()">DbConfig</a></code></span></div>
+<div class="block">Dialeto SQL desta base de dados (paginacao, upsert, tipos, aspas).</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="DbConfig.html#limitSyntax(int,int)">limitSyntax</a></code>&nbsp;in class&nbsp;<code><a href="DbConfig.html" title="class in fabiorodrigues.bricks.data.config">DbConfig</a></code></dd>
-<dt>Parameters:</dt>
-<dd><code>limit</code> - numero maximo de linhas</dd>
-<dd><code>offset</code> - numero de linhas a saltar</dd>
+<dd><code><a href="DbConfig.html#dialect()">dialect</a></code>&nbsp;in class&nbsp;<code><a href="DbConfig.html" title="class in fabiorodrigues.bricks.data.config">DbConfig</a></code></dd>
 <dt>Returns:</dt>
-<dd>a clausula SQL gerada</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="autoIncrementSyntax()">
-<h3>autoIncrementSyntax</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">autoIncrementSyntax</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from class:&nbsp;<code><a href="DbConfig.html#autoIncrementSyntax()">DbConfig</a></code></span></div>
-<div class="block">Sintaxe para o campo auto-incremento no CREATE TABLE.</div>
-<dl class="notes">
-<dt>Specified by:</dt>
-<dd><code><a href="DbConfig.html#autoIncrementSyntax()">autoIncrementSyntax</a></code>&nbsp;in class&nbsp;<code><a href="DbConfig.html" title="class in fabiorodrigues.bricks.data.config">DbConfig</a></code></dd>
-<dt>Returns:</dt>
-<dd>a definicao de coluna auto-incremento (ex: <code>INTEGER PRIMARY KEY AUTOINCREMENT</code>)</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="supportsOnDuplicateKey()">
-<h3>supportsOnDuplicateKey</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">supportsOnDuplicateKey</span>()</div>
-<div class="block"><span class="description-from-type-label">Description copied from class:&nbsp;<code><a href="DbConfig.html#supportsOnDuplicateKey()">DbConfig</a></code></span></div>
-<div class="block">Indica se a base de dados suporta upsert via clausula de conflito.
- SQLite usa <code>INSERT OR REPLACE</code> como prefixo em vez de clausula.</div>
-<dl class="notes">
-<dt>Specified by:</dt>
-<dd><code><a href="DbConfig.html#supportsOnDuplicateKey()">supportsOnDuplicateKey</a></code>&nbsp;in class&nbsp;<code><a href="DbConfig.html" title="class in fabiorodrigues.bricks.data.config">DbConfig</a></code></dd>
-<dt>Returns:</dt>
-<dd>true se suportar clausula de conflito pos-VALUES</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="onConflictSyntax(java.lang.String[],java.lang.String)">
-<h3>onConflictSyntax</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">onConflictSyntax</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>[]&nbsp;updateFields,
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;conflictTarget)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from class:&nbsp;<code><a href="DbConfig.html#onConflictSyntax(java.lang.String%5B%5D,java.lang.String)">DbConfig</a></code></span></div>
-<div class="block">Gera a clausula de upsert para os campos indicados.
- Chamado apenas quando <a href="DbConfig.html#supportsOnDuplicateKey()"><code>DbConfig.supportsOnDuplicateKey()</code></a> e true.</div>
-<dl class="notes">
-<dt>Specified by:</dt>
-<dd><code><a href="DbConfig.html#onConflictSyntax(java.lang.String%5B%5D,java.lang.String)">onConflictSyntax</a></code>&nbsp;in class&nbsp;<code><a href="DbConfig.html" title="class in fabiorodrigues.bricks.data.config">DbConfig</a></code></dd>
-<dt>Parameters:</dt>
-<dd><code>updateFields</code> - campos a atualizar em caso de conflito</dd>
-<dd><code>conflictTarget</code> - campo de conflito (necessario para PostgreSQL, ignorado pelo MySQL)</dd>
-<dt>Returns:</dt>
-<dd>a clausula SQL gerada</dd>
+<dd>o dialeto</dd>
 </dl>
 </section>
 </li>

@@ -3,4 +3,5 @@ fabiorodrigues.bricks.components
 fabiorodrigues.bricks.core
 fabiorodrigues.bricks.data
 fabiorodrigues.bricks.data.config
+fabiorodrigues.bricks.data.dialect
 fabiorodrigues.bricks.style
