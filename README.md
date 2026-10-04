@@ -230,6 +230,26 @@ public class DatabaseConfig {
 }
 ```
 
+#### SQL Server (Docker ou Azure SQL)
+
+```java
+// Azure SQL (serverless): cada query abre e fecha a ligação para a base poder pausar
+return SQLServerConfig.azure("nome-do-servidor", "escola")
+    .credentialsFromEnv("DB_USER", "DB_PASSWORD");
+
+// Desenvolvimento local em Docker (localhost:1433, utilizador sa)
+return SQLServerConfig.localDocker("escola")
+    .password(System.getenv("MSSQL_SA_PASSWORD"));
+```
+
+O driver não vem com o Bricks — adiciona-o à app (versão `.jre11` para Java 17):
+
+```kotlin
+runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:13.6.0.jre11")
+```
+
+Notas SQL Server: paginar sempre com `orderBy` (`SELECT DISTINCT` paginado exige-o); upsert precisa de `.conflictOn("coluna_unique")`; usar `ColumnType.STRING`/`TEXT` (dão `NVARCHAR`) em vez de `TEXT`.
+
 ### `database/schema/DatabaseSchema.java`
 
 Define a estrutura das tabelas. Chamado uma vez no arranque da app via `Effect`:
@@ -238,14 +258,16 @@ Define a estrutura das tabelas. Chamado uma vez no arranque da app via `Effect`:
 package database.schema;
 
 import fabiorodrigues.bricks.data.DB;
+import fabiorodrigues.bricks.data.dialect.ColumnType;
 
 public class DatabaseSchema {
     public static void run() {
+        // ColumnType gera o tipo certo para SQLite, MySQL, PostgreSQL e SQL Server
         DB.query()
             .createTableIfNotExists("utilizadores")
-            .column("id", "INTEGER PRIMARY KEY AUTOINCREMENT")
-            .column("nome", "TEXT NOT NULL")
-            .column("email", "TEXT NOT NULL")
+            .column("id", ColumnType.ID)
+            .column("nome", ColumnType.STRING, "NOT NULL")
+            .column("email", ColumnType.STRING, "NOT NULL UNIQUE")
             .execute();
     }
 }

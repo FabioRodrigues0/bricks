@@ -1,14 +1,17 @@
 package fabiorodrigues.bricks.data.config;
 
+import fabiorodrigues.bricks.data.dialect.SqlDialect;
+
 /**
  * Contrato de configuracao de base de dados.
- * Cada implementacao define a URL de ligacao, driver JDBC e sintaxe especifica.
+ * Cada implementacao define a URL de ligacao, driver JDBC e o {@link SqlDialect} a usar.
  *
  * <p>Implementacoes disponiveis:</p>
  * <ul>
  *   <li>{@link SQLiteConfig} — padrao, sem configuracao necessaria</li>
  *   <li>{@link MySQLConfig} — host, porta, base de dados, user, password</li>
  *   <li>{@link PostgreSQLConfig} — host, porta, base de dados, user, password</li>
+ *   <li>{@link SQLServerConfig} — SQL Server em Docker ou Azure SQL Database</li>
  * </ul>
  */
 public abstract class DbConfig {
@@ -42,36 +45,20 @@ public abstract class DbConfig {
     public abstract String getPassword();
 
     /**
-     * Clausula LIMIT/OFFSET no dialeto desta base de dados.
+     * Dialeto SQL desta base de dados (paginacao, upsert, tipos, aspas).
      *
-     * @param limit  numero maximo de linhas
-     * @param offset numero de linhas a saltar
-     * @return a clausula SQL gerada
+     * @return o dialeto
      */
-    public abstract String limitSyntax(int limit, int offset);
+    public abstract SqlDialect dialect();
 
     /**
-     * Sintaxe para o campo auto-incremento no CREATE TABLE.
+     * Indica se a ligacao deve ficar aberta e partilhada entre queries.
+     * Com {@code false}, cada query abre e fecha a sua ligacao — necessario em bases
+     * serverless (Azure SQL) que so entram em pausa sem ligacoes abertas.
      *
-     * @return a definicao de coluna auto-incremento (ex: {@code INTEGER PRIMARY KEY AUTOINCREMENT})
+     * @return true para manter uma ligacao partilhada (padrao)
      */
-    public abstract String autoIncrementSyntax();
-
-    /**
-     * Indica se a base de dados suporta upsert via clausula de conflito.
-     * SQLite usa {@code INSERT OR REPLACE} como prefixo em vez de clausula.
-     *
-     * @return true se suportar clausula de conflito pos-VALUES
-     */
-    public abstract boolean supportsOnDuplicateKey();
-
-    /**
-     * Gera a clausula de upsert para os campos indicados.
-     * Chamado apenas quando {@link #supportsOnDuplicateKey()} e true.
-     *
-     * @param updateFields  campos a atualizar em caso de conflito
-     * @param conflictTarget campo de conflito (necessario para PostgreSQL, ignorado pelo MySQL)
-     * @return a clausula SQL gerada
-     */
-    public abstract String onConflictSyntax(String[] updateFields, String conflictTarget);
+    public boolean keepConnectionOpen() {
+        return true;
+    }
 }

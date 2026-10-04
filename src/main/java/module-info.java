@@ -11,4 +11,5 @@ module fabiorodrigues.bricks {
     exports fabiorodrigues.bricks.style;
     exports fabiorodrigues.bricks.data;
     exports fabiorodrigues.bricks.data.config;
+    exports fabiorodrigues.bricks.data.dialect;
 }

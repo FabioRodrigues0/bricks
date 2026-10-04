@@ -6,6 +6,7 @@ import fabiorodrigues.bricks.data.config.SQLiteConfig;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Set;
 
 /**
  * Ponto de entrada para o sistema de base de dados da lib Bricks.
@@ -70,29 +71,82 @@ public final class DB {
         config = dbConfig != null ? dbConfig : new SQLiteConfig();
     }
 
+    /** Codigos de erro do Azure SQL transitorios: base a acordar da pausa ou ocupada. */
+    private static final Set<Integer> TRANSIENT_ERRORS = Set.of(40613, 40501, 40197);
+    private static final int MAX_ATTEMPTS = 3;
+
     /**
-     * Devolve a conexao ativa, criando uma nova se nao existir ou tiver fechado.
-     * A conexao e partilhada entre todas as queries — e reutilizada em vez de abrir
-     * uma nova a cada {@code execute()}.
+     * Trabalho que usa uma ligacao JDBC.
+     *
+     * @param <T> o tipo do resultado
+     */
+    @FunctionalInterface
+    interface ConnectionWork<T> {
+        T apply(Connection connection) throws Exception;
+    }
+
+    /**
+     * Devolve a conexao partilhada, criando uma nova se nao existir ou tiver fechado.
+     * Ligacoes transitorias do Azure (base a acordar) sao repetidas ate 3 vezes.
+     *
+     * <p>Nota: ignora {@link DbConfig#keepConnectionOpen()} — a conexao fica aberta ate ao
+     * proximo {@link #configure}. As queries do {@link Query} respeitam essa politica.</p>
      *
      * @return a conexao JDBC ativa
      * @throws SQLException se nao for possivel ligar
      */
     public static synchronized Connection getConnection() throws SQLException {
         if (connection == null || !isValid()) {
-            try {
-                Class.forName(config.getDriver());
-            } catch (ClassNotFoundException e) {
-                throw new SQLException("Driver JDBC nao encontrado: " + config.getDriver(), e);
-            }
-            connection = DriverManager.getConnection(config.getUrl(), config.getUser(), config.getPassword());
+            connection = open();
         }
         return connection;
     }
 
+    /**
+     * Executa trabalho com uma ligacao segundo a politica da configuracao:
+     * ligacao partilhada se {@link DbConfig#keepConnectionOpen()}, senao uma ligacao
+     * nova fechada no fim (permite a pausa de bases serverless).
+     */
+    static <T> T withConnection(ConnectionWork<T> work) throws Exception {
+        if (config.keepConnectionOpen()) {
+            return work.apply(getConnection());
+        }
+        try (Connection c = open()) {
+            return work.apply(c);
+        }
+    }
+
+    private static Connection open() throws SQLException {
+        DbConfig cfg = config;
+        try {
+            Class.forName(cfg.getDriver());
+        } catch (ClassNotFoundException ignored) {
+            // drivers JDBC 4 registam-se via ServiceLoader; o DriverManager da o erro se faltar
+        }
+        for (int attempt = 1; ; attempt++) {
+            try {
+                return DriverManager.getConnection(cfg.getUrl(), cfg.getUser(), cfg.getPassword());
+            } catch (SQLException e) {
+                if (!TRANSIENT_ERRORS.contains(e.getErrorCode()) || attempt == MAX_ATTEMPTS) {
+                    throw e;
+                }
+                sleep(attempt * 5_000L, e);
+            }
+        }
+    }
+
+    private static void sleep(long millis, SQLException cause) throws SQLException {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw cause;
+        }
+    }
+
     private static boolean isValid() {
         try {
-            return !connection.isClosed() && connection.isValid(1);
+            return !connection.isClosed() && connection.isValid(2);
         } catch (SQLException e) {
             return false;
         }

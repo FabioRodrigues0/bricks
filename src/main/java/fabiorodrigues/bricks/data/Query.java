@@ -1,6 +1,8 @@
 package fabiorodrigues.bricks.data;
 
 import fabiorodrigues.bricks.data.config.DbConfig;
+import fabiorodrigues.bricks.data.dialect.ColumnType;
+import fabiorodrigues.bricks.data.dialect.SqlDialect;
 import fabiorodrigues.bricks.data.mapper.ResultMapper;
 
 import java.sql.*;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
  *     .insertInto("alunos")
  *     .values(Map.of("nome", "Fabio", "turma", 1))
  *     .onDuplicateUpdate("nome", "turma")
+ *     .conflictOn("id")
  *     .execute();
  * }</pre>
  *
@@ -38,9 +41,9 @@ import java.util.stream.Collectors;
  */
 public class Query {
 
-    private enum Type { SELECT, INSERT, UPDATE, DELETE, CREATE_TABLE }
+    private enum Type { SELECT, INSERT, UPDATE, DELETE, CREATE_TABLE, RAW }
 
-    private final DbConfig config;
+    private final SqlDialect dialect;
     private Type type;
 
     // SELECT
@@ -50,8 +53,8 @@ public class Query {
     private final List<Object[]> wheres = new ArrayList<>();
     private String orderByField;
     private String orderByDir = "ASC";
-    private int limitVal = -1;
-    private int offsetVal = 0;
+    private Integer limitVal;
+    private Integer offsetVal;
     private Class<?> groupParentClass;
     private String groupParentKey;
     private String groupChildListField;
@@ -62,7 +65,7 @@ public class Query {
     private String insertTable;
     private Map<String, Object> insertVals;
     private String[] onDupFields;
-    private String conflictOnField;
+    private List<String> conflictOnFields = List.of();
 
     // UPDATE
     private String updateTable;
@@ -75,11 +78,15 @@ public class Query {
     private String createTableName;
     private final List<String[]> tableCols = new ArrayList<>();
 
+    // RAW
+    private String rawSql;
+    private List<Object> rawParams = List.of();
+
     // UNION — cada entry e [Query query, boolean isAll]
     private final List<Object[]> unions = new ArrayList<>();
 
     Query(DbConfig config) {
-        this.config = config;
+        this.dialect = config.dialect();
     }
 
     // --- SELECT ---
@@ -204,9 +211,10 @@ public class Query {
     }
 
     /**
-     * Limita o numero de linhas devolvidas.
+     * Limita o numero de linhas devolvidas. Apenas para SELECT.
+     * Em SQL Server, paginar sem {@link #orderBy} da ordem indefinida.
      *
-     * @param n {@code int} — numero maximo de linhas
+     * @param n {@code int} — numero maximo de linhas ({@code >= 1})
      * @return esta query para encadeamento
      */
     public Query limit(int n) {
@@ -215,7 +223,7 @@ public class Query {
     }
 
     /**
-     * Define o offset (numero de linhas a saltar).
+     * Define o offset (numero de linhas a saltar). Apenas para SELECT.
      *
      * @param n {@code int} — numero de linhas a saltar
      * @return esta query para encadeamento
@@ -301,6 +309,39 @@ public class Query {
         return this;
     }
 
+    // --- RAW ---
+
+    /**
+     * Define SQL escrito a mao, para o que o builder nao cobre ({@code GROUP BY}, {@code HAVING},
+     * subqueries, {@code OR}, ...). Os valores vao por {@code ?}, pela ordem de {@code params}.
+     * O SQL nao e traduzido entre dialetos.
+     *
+     * <pre>{@code
+     * List<TurmaTotal> totais = DB.query()
+     *     .raw("SELECT turma, COUNT(*) AS total FROM alunos WHERE nome LIKE ? GROUP BY turma HAVING COUNT(*) > ?",
+     *          "J%", 2)
+     *     .execute(TurmaTotal.class);
+     *
+     * int afetados = DB.query()
+     *     .raw("UPDATE alunos SET turma = turma + 1 WHERE turma < ?", 3)
+     *     .execute();
+     * }</pre>
+     *
+     * <p>Executar com {@link #execute(Class)} ou {@link #executeRaw()} se devolver linhas,
+     * ou com {@link #execute()} / {@link #executeResult()} caso contrario
+     * (num INSERT devolve o id gerado).</p>
+     *
+     * @param sql    {@code String} — SQL completo com {@code ?} nos valores
+     * @param params {@code Object...} — valores dos {@code ?}, por ordem
+     * @return esta query para encadeamento
+     */
+    public Query raw(String sql, Object... params) {
+        this.type = Type.RAW;
+        this.rawSql = sql;
+        this.rawParams = Arrays.asList(params);
+        return this;
+    }
+
     // --- INSERT ---
 
     /**
@@ -361,10 +402,13 @@ public class Query {
 
     /**
      * Ativa upsert — em caso de chave duplicada, atualiza os campos indicados.
-     * Em SQLite usa {@code INSERT OR REPLACE}; em MySQL usa {@code ON DUPLICATE KEY UPDATE};
-     * em PostgreSQL usa {@code ON CONFLICT ... DO UPDATE SET} (ver {@link #conflictOn(String)}).
+     * Em SQLite e PostgreSQL usa {@code ON CONFLICT ... DO UPDATE SET}; em MySQL usa
+     * {@code ON DUPLICATE KEY UPDATE}; em SQL Server usa {@code MERGE} (ver {@link #conflictOn(String...)}).
      *
-     * @param fields {@code String...} — campos a atualizar em caso de conflito
+     * <p>Em SQL Server nao se insere valor explicito numa coluna {@code IDENTITY}: fazer upsert
+     * por uma chave natural ({@code numero}, {@code email}).</p>
+     *
+     * @param fields {@code String...} — campos a atualizar em caso de conflito (nenhum = ignorar o conflito)
      * @return esta query para encadeamento
      */
     public Query onDuplicateUpdate(String... fields) {
@@ -373,14 +417,14 @@ public class Query {
     }
 
     /**
-     * Define o campo de conflito para upsert no PostgreSQL.
-     * Ignorado por MySQL e SQLite.
+     * Define os campos de conflito para upsert.
+     * Obrigatorio em SQL Server e PostgreSQL; opcional em SQLite; ignorado por MySQL.
      *
-     * @param field {@code String} — campo com UNIQUE constraint que define o conflito
+     * @param fields {@code String...} — campos com PK/UNIQUE que definem o conflito
      * @return esta query para encadeamento
      */
-    public Query conflictOn(String field) {
-        this.conflictOnField = field;
+    public Query conflictOn(String... fields) {
+        this.conflictOnFields = List.of(fields);
         return this;
     }
 
@@ -431,9 +475,9 @@ public class Query {
      * <pre>{@code
      * DB.query()
      *     .createTableIfNotExists("alunos")
-     *     .column("id", "INTEGER PRIMARY KEY AUTOINCREMENT")
-     *     .column("nome", "TEXT NOT NULL")
-     *     .column("turma", "INTEGER")
+     *     .column("id", ColumnType.ID)
+     *     .column("nome", ColumnType.STRING, "NOT NULL")
+     *     .column("turma", ColumnType.INTEGER)
      *     .execute();
      * }</pre>
      *
@@ -447,7 +491,7 @@ public class Query {
     }
 
     /**
-     * Adiciona uma coluna ao CREATE TABLE.
+     * Adiciona uma coluna ao CREATE TABLE com definicao SQL raw (especifica do dialeto).
      *
      * @param name       {@code String} — nome da coluna
      * @param definition {@code String} — definicao SQL (ex: {@code "TEXT NOT NULL"}, {@code "INTEGER DEFAULT 0"})
@@ -456,6 +500,33 @@ public class Query {
     public Query column(String name, String definition) {
         tableCols.add(new String[]{name, definition});
         return this;
+    }
+
+    /**
+     * Adiciona uma coluna ao CREATE TABLE com tipo portavel entre bases de dados.
+     *
+     * @param name {@code String} — nome da coluna
+     * @param type {@code ColumnType} — tipo portavel (ex: {@code ColumnType.STRING})
+     * @return esta query para encadeamento
+     */
+    public Query column(String name, ColumnType type) {
+        return column(name, dialect.columnType(type));
+    }
+
+    /**
+     * Adiciona uma coluna ao CREATE TABLE com tipo portavel e restricoes.
+     *
+     * <pre>{@code
+     * .column("numero", ColumnType.STRING, "NOT NULL UNIQUE")
+     * }</pre>
+     *
+     * @param name        {@code String} — nome da coluna
+     * @param type        {@code ColumnType} — tipo portavel
+     * @param constraints {@code String} — restricoes SQL (ex: {@code "NOT NULL"}, {@code "DEFAULT 0"})
+     * @return esta query para encadeamento
+     */
+    public Query column(String name, ColumnType type, String constraints) {
+        return column(name, dialect.columnType(type) + " " + constraints);
     }
 
     // --- Execute ---
@@ -474,16 +545,20 @@ public class Query {
         String sql = buildSelectSql();
         List<Object> params = collectSelectParams();
 
-        try (PreparedStatement ps = DB.getConnection().prepareStatement(sql)) {
-            bindParams(ps, params);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (groupParentClass != null && groupChildClass != null) {
-                    return (List<T>) ResultMapper.mapGrouped(rs,
-                        groupParentClass, groupParentKey,
-                        groupChildListField, groupChildClass, groupChildKey);
+        try {
+            return DB.withConnection(conn -> {
+                try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                    bindParams(ps, params);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (groupParentClass != null && groupChildClass != null) {
+                            return (List<T>) ResultMapper.mapGrouped(rs,
+                                groupParentClass, groupParentKey,
+                                groupChildListField, groupChildClass, groupChildKey);
+                        }
+                        return ResultMapper.mapList(rs, type);
+                    }
                 }
-                return ResultMapper.mapList(rs, type);
-            }
+            });
         } catch (Exception e) {
             throw new RuntimeException("Erro ao executar SELECT: " + sql + " | " + e.getMessage(), e);
         }
@@ -499,11 +574,15 @@ public class Query {
         String sql = buildSelectSql();
         List<Object> params = collectSelectParams();
 
-        try (PreparedStatement ps = DB.getConnection().prepareStatement(sql)) {
-            bindParams(ps, params);
-            try (ResultSet rs = ps.executeQuery()) {
-                return new QueryResult(readRows(rs));
-            }
+        try {
+            return DB.withConnection(conn -> {
+                try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                    bindParams(ps, params);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        return new QueryResult(readRows(rs));
+                    }
+                }
+            });
         } catch (Exception e) {
             throw new RuntimeException("Erro ao executar SELECT: " + sql + " | " + e.getMessage(), e);
         }
@@ -545,20 +624,28 @@ public class Query {
             case UPDATE -> { sql = buildUpdateSql(); params = collectUpdateParams(); }
             case DELETE -> { sql = buildDeleteSql(); params = collectWhereParams(); }
             case CREATE_TABLE -> { sql = buildCreateTableSql(); params = List.of(); }
+            case RAW -> { sql = rawSql; params = rawParams; }
             default -> throw new IllegalStateException("executeResult() e apenas para INSERT/UPDATE/DELETE/CREATE TABLE");
         }
 
-        try (PreparedStatement ps = DB.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            bindParams(ps, params);
-            int affectedRows = ps.executeUpdate();
+        boolean isInsert = isInsert();
+        try {
+            return DB.withConnection(conn -> {
+                try (PreparedStatement ps = isInsert
+                        ? conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+                        : conn.prepareStatement(sql)) {
+                    bindParams(ps, params);
+                    int affectedRows = ps.executeUpdate();
 
-            List<Map<String, Object>> generatedKeys = readGeneratedKeys(ps);
-            Object generatedId = firstGeneratedId(generatedKeys);
-            List<Map<String, Object>> rows = type == Type.INSERT && fetchInsertedRow
-                ? fetchInsertedRow(generatedId)
-                : List.of();
+                    List<Map<String, Object>> generatedKeys = isInsert ? readGeneratedKeys(ps) : List.of();
+                    Object generatedId = firstGeneratedId(generatedKeys);
+                    List<Map<String, Object>> rows = isInsert && fetchInsertedRow
+                        ? fetchInsertedRow(conn, generatedId)
+                        : List.of();
 
-            return new QueryResult(rows, generatedKeys, affectedRows, generatedId);
+                    return new QueryResult(rows, generatedKeys, affectedRows, generatedId);
+                }
+            });
         } catch (Exception e) {
             throw new RuntimeException("Erro ao executar query: " + sql + " | " + e.getMessage(), e);
         }
@@ -577,15 +664,21 @@ public class Query {
      */
     public int execute() {
         QueryResult result = executeResult(false);
-        if (type == Type.INSERT) {
+        if (isInsert()) {
             return result.getGeneratedIdAsInt();
         }
         return result.getAffectedRows();
     }
 
+    private boolean isInsert() {
+        return type == Type.INSERT
+            || (type == Type.RAW && rawSql.stripLeading().regionMatches(true, 0, "INSERT", 0, 6));
+    }
+
     // --- SQL builders ---
 
     private String buildSelectSql() {
+        if (type == Type.RAW) return rawSql;
         StringBuilder sb = new StringBuilder("SELECT ");
         sb.append(selectCols.isEmpty() ? "*" : String.join(", ", selectCols));
         sb.append(" FROM ").append(fromClause);
@@ -599,9 +692,9 @@ public class Query {
         if (orderByField != null) {
             sb.append(" ORDER BY ").append(orderByField).append(" ").append(orderByDir);
         }
-        if (limitVal >= 0) {
-            sb.append(" ").append(config.limitSyntax(limitVal, offsetVal));
-        }
+        String sql = dialect.paginate(sb.toString(), limitVal, offsetVal, orderByField != null);
+        sb.setLength(0);
+        sb.append(sql);
 
         for (Object[] entry : unions) {
             Query unionQuery = (Query) entry[0];
@@ -613,49 +706,49 @@ public class Query {
     }
 
     private String buildInsertSql() {
+        // bind segue insertVals.values() — mesma ordem que keySet()
         List<String> cols = new ArrayList<>(insertVals.keySet());
-        String colList = String.join(", ", cols);
+        if (onDupFields != null) {
+            return dialect.upsert(insertTable, cols, conflictOnFields, List.of(onDupFields));
+        }
+        String colList = cols.stream().map(dialect::quoteIdentifier).collect(Collectors.joining(", "));
         String placeholders = cols.stream().map(c -> "?").collect(Collectors.joining(", "));
-
-        StringBuilder sb = new StringBuilder();
-        if (onDupFields != null && !config.supportsOnDuplicateKey()) {
-            sb.append("INSERT OR REPLACE INTO ");
-        } else {
-            sb.append("INSERT INTO ");
-        }
-        sb.append(insertTable).append(" (").append(colList).append(") VALUES (").append(placeholders).append(")");
-
-        if (onDupFields != null && config.supportsOnDuplicateKey()) {
-            sb.append(" ").append(config.onConflictSyntax(onDupFields, conflictOnField));
-        }
-        return sb.toString();
+        return "INSERT INTO " + dialect.quoteIdentifier(insertTable) + " (" + colList + ") VALUES (" + placeholders + ")";
     }
 
     private String buildUpdateSql() {
         ensureUpdateHasValues();
 
+        ensureNoPagination("UPDATE");
+
         String sets = setVals.keySet().stream()
-            .map(k -> k + " = ?")
+            .map(k -> dialect.quoteIdentifier(k) + " = ?")
             .collect(Collectors.joining(", "));
 
-        StringBuilder sb = new StringBuilder("UPDATE ").append(updateTable).append(" SET ").append(sets);
+        StringBuilder sb = new StringBuilder("UPDATE ").append(dialect.quoteIdentifier(updateTable)).append(" SET ").append(sets);
         appendWhere(sb);
-        if (limitVal >= 0) sb.append(" ").append(config.limitSyntax(limitVal, offsetVal));
         return sb.toString();
     }
 
     private String buildDeleteSql() {
+        ensureNoPagination("DELETE");
+
         StringBuilder sb = new StringBuilder("DELETE FROM ").append(deleteTable);
         appendWhere(sb);
-        if (limitVal >= 0) sb.append(" ").append(config.limitSyntax(limitVal, 0));
         return sb.toString();
     }
 
     private String buildCreateTableSql() {
         String cols = tableCols.stream()
-            .map(c -> c[0] + " " + c[1])
+            .map(c -> dialect.quoteIdentifier(c[0]) + " " + c[1])
             .collect(Collectors.joining(", "));
-        return "CREATE TABLE IF NOT EXISTS " + createTableName + " (" + cols + ")";
+        return dialect.createTableIfNotExists(createTableName, cols);
+    }
+
+    private void ensureNoPagination(String statement) {
+        if (limitVal != null || offsetVal != null) {
+            throw new IllegalStateException(statement + " nao suporta limit/offset — filtrar com .where(...).");
+        }
     }
 
     private void appendWhere(StringBuilder sb) {
@@ -706,6 +799,7 @@ public class Query {
     }
 
     private List<Object> collectSelectParams() {
+        if (type == Type.RAW) return rawParams;
         List<Object> params = collectWhereParams();
         for (Object[] entry : unions) {
             Query unionQuery = (Query) entry[0];
@@ -733,13 +827,13 @@ public class Query {
         return generatedKeys.get(0).values().iterator().next();
     }
 
-    private List<Map<String, Object>> fetchInsertedRow(Object generatedId) {
+    private List<Map<String, Object>> fetchInsertedRow(Connection conn, Object generatedId) {
         if (generatedId == null || insertTable == null) {
             return List.of();
         }
 
-        String sql = "SELECT * FROM " + insertTable + " WHERE id = ? " + config.limitSyntax(1, 0);
-        try (PreparedStatement ps = DB.getConnection().prepareStatement(sql)) {
+        String sql = "SELECT * FROM " + dialect.quoteIdentifier(insertTable) + " WHERE " + dialect.quoteIdentifier("id") + " = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setObject(1, generatedId);
             try (ResultSet rs = ps.executeQuery()) {
                 return readRows(rs);

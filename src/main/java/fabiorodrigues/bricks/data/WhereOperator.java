@@ -22,8 +22,8 @@ public enum WhereOperator {
     /** Igual: {@code campo = valor} */
     EQ("="),
 
-    /** Diferente: {@code campo != valor} */
-    NEQ("!="),
+    /** Diferente: {@code campo <> valor} (padrao SQL, funciona em todos os motores) */
+    NEQ("<>"),
 
     /** Maior que: {@code campo > valor} */
     GT(">"),

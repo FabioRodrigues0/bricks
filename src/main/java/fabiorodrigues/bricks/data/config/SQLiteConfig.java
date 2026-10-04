@@ -1,5 +1,8 @@
 package fabiorodrigues.bricks.data.config;
 
+import fabiorodrigues.bricks.data.dialect.SQLiteDialect;
+import fabiorodrigues.bricks.data.dialect.SqlDialect;
+
 import java.io.File;
 
 /**
@@ -62,22 +65,7 @@ public class SQLiteConfig extends DbConfig {
     }
 
     @Override
-    public String limitSyntax(int limit, int offset) {
-        return "LIMIT " + limit + " OFFSET " + offset;
-    }
-
-    @Override
-    public String autoIncrementSyntax() {
-        return "INTEGER PRIMARY KEY AUTOINCREMENT";
-    }
-
-    @Override
-    public boolean supportsOnDuplicateKey() {
-        return false; // SQLite usa INSERT OR REPLACE como prefixo
-    }
-
-    @Override
-    public String onConflictSyntax(String[] updateFields, String conflictTarget) {
-        return ""; // nao usado — supportsOnDuplicateKey() == false
+    public SqlDialect dialect() {
+        return SQLiteDialect.INSTANCE;
     }
 }

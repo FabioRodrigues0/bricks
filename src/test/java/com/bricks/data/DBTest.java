@@ -287,4 +287,37 @@ class DBTest {
                 .execute()
         );
     }
+
+    record TurmaTotal(int turma, int total) {}
+
+    @Test
+    @Order(13)
+    void rawSelectComGroupByMapeiaRecord() {
+        for (String nome : List.of("Joana", "Jorge", "Rui")) {
+            DB.query().insertInto("alunos").values(Map.of("nome", nome, "turma", 1)).execute();
+        }
+        DB.query().insertInto("alunos").values(Map.of("nome", "Julia", "turma", 2)).execute();
+
+        List<TurmaTotal> totais = DB.query()
+            .raw("SELECT turma, COUNT(*) AS total FROM alunos WHERE nome LIKE ? GROUP BY turma HAVING COUNT(*) > ?",
+                "J%", 1)
+            .execute(TurmaTotal.class);
+
+        assertEquals(1, totais.size());
+        assertEquals(1, totais.get(0).turma());
+        assertEquals(2, totais.get(0).total());
+    }
+
+    @Test
+    @Order(14)
+    void rawInsertDevolveIdEUpdateDevolveAfetados() {
+        int id = DB.query().raw("INSERT INTO alunos (nome, turma) VALUES (?, ?)", "Lia", 1).execute();
+        assertTrue(id > 0);
+
+        int afetados = DB.query().raw("UPDATE alunos SET turma = turma + 1 WHERE id = ? OR nome = ?", id, "x").execute();
+        assertEquals(1, afetados);
+
+        QueryResult r = DB.query().raw("SELECT turma FROM alunos WHERE id = ?", id).executeRaw();
+        assertEquals(2, ((Number) r.first().get("turma")).intValue());
+    }
 }

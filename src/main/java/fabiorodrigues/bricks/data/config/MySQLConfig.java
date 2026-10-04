@@ -1,7 +1,7 @@
 package fabiorodrigues.bricks.data.config;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import fabiorodrigues.bricks.data.dialect.MySQLDialect;
+import fabiorodrigues.bricks.data.dialect.SqlDialect;
 
 /**
  * Configuracao MySQL com API fluente.
@@ -103,25 +103,7 @@ public class MySQLConfig extends DbConfig {
     }
 
     @Override
-    public String limitSyntax(int limit, int offset) {
-        return "LIMIT " + limit + " OFFSET " + offset;
-    }
-
-    @Override
-    public String autoIncrementSyntax() {
-        return "INT PRIMARY KEY AUTO_INCREMENT";
-    }
-
-    @Override
-    public boolean supportsOnDuplicateKey() {
-        return true;
-    }
-
-    @Override
-    public String onConflictSyntax(String[] updateFields, String conflictTarget) {
-        String updates = Arrays.stream(updateFields)
-            .map(f -> f + " = VALUES(" + f + ")")
-            .collect(Collectors.joining(", "));
-        return "ON DUPLICATE KEY UPDATE " + updates;
+    public SqlDialect dialect() {
+        return MySQLDialect.INSTANCE;
     }
 }

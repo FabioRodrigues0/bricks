@@ -1,7 +1,7 @@
 package fabiorodrigues.bricks.data.config;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import fabiorodrigues.bricks.data.dialect.PostgreSQLDialect;
+import fabiorodrigues.bricks.data.dialect.SqlDialect;
 
 /**
  * Configuracao PostgreSQL com API fluente.
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  *     .insertInto("alunos")
  *     .values(Map.of("id", 1, "nome", "Fabio"))
  *     .onDuplicateUpdate("nome")
- *     .conflictOn("id")   // necessario no PostgreSQL
+ *     .conflictOn("id")   // necessario no PostgreSQL e SQL Server
  *     .execute();
  * }</pre>
  *
@@ -111,26 +111,7 @@ public class PostgreSQLConfig extends DbConfig {
     }
 
     @Override
-    public String limitSyntax(int limit, int offset) {
-        return "LIMIT " + limit + " OFFSET " + offset;
-    }
-
-    @Override
-    public String autoIncrementSyntax() {
-        return "SERIAL PRIMARY KEY";
-    }
-
-    @Override
-    public boolean supportsOnDuplicateKey() {
-        return true;
-    }
-
-    @Override
-    public String onConflictSyntax(String[] updateFields, String conflictTarget) {
-        String target = conflictTarget != null ? "(" + conflictTarget + ")" : "";
-        String updates = Arrays.stream(updateFields)
-            .map(f -> f + " = EXCLUDED." + f)
-            .collect(Collectors.joining(", "));
-        return "ON CONFLICT " + target + " DO UPDATE SET " + updates;
+    public SqlDialect dialect() {
+        return PostgreSQLDialect.INSTANCE;
     }
 }
