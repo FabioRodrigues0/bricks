@@ -1460,7 +1460,29 @@ public class BricksTheme {
                 toHex(c.surfaceContainerHigh()),
                 toHex(c.primary()),
                 toHex(c.onPrimary())
-            );
+            ) + formCss();
+    }
+
+    private String formCss() {
+        ColorScheme c = colorScheme;
+        return """
+
+        /* ---- Form / validacao ---- */
+        .bricks-form {
+            -fx-padding: 0;
+        }
+        .label.bricks-field-error {
+            -fx-text-fill: %s;
+            -fx-font-size: 12px;
+            -fx-padding: 2 0 0 2;
+        }
+        .text-field.bricks-text-field.bricks-field-error-border,
+        .text-field.bricks-text-field.bricks-field-error-border:focused,
+        .text-area.bricks-text-area.bricks-field-error-border,
+        .text-area.bricks-text-area.bricks-field-error-border:focused {
+            -fx-border-color: %s;
+        }
+        """.formatted(toHex(c.error()), toHex(c.error()));
     }
 
     private String layoutCss() {

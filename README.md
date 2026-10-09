@@ -212,7 +212,7 @@ module com.exemplo {
 
 ### `config/database/DatabaseConfig.java`
 
-Para usar MySQL ou PostgreSQL em vez de SQLite, cria este ficheiro em `config/database/`. O Bricks detecta-o automaticamente via `DB.autoConfig()`. Se o ficheiro não existir, usa SQLite e cria `./data/database.db` na raiz do projeto.
+Para usar MySQL, PostgreSQL ou SQL Server em vez de SQLite, cria este ficheiro em `config/database/`. O Bricks detecta-o automaticamente via `DB.autoConfig()`. Se o ficheiro não existir, usa SQLite e cria `./data/database.db` na raiz do projeto.
 
 ```java
 package config.database;
@@ -242,13 +242,42 @@ return SQLServerConfig.localDocker("escola")
     .password(System.getenv("MSSQL_SA_PASSWORD"));
 ```
 
-O driver não vem com o Bricks — adiciona-o à app (versão `.jre11` para Java 17):
+| Modo | Ligação | Certificado | Utilizador |
+| --- | --- | --- | --- |
+| `azure(servidor, bd)` | Abre e fecha por query (a base serverless pode pausar); repete automaticamente nos erros transitórios `40613`/`40501`/`40197` (base a acordar) | Validado (`*.database.windows.net`) | Definir com `.user()`/`.password()` ou `.credentialsFromEnv()` |
+| `localDocker(bd)` | Persistente (`localhost:1433`) | Auto-assinado aceite | `sa` |
+
+O nome do servidor Azure pode ser só o nome (`"meu-servidor"`) ou o host completo. Nunca escrever passwords no código — usar variáveis de ambiente.
+
+Para arrancar um SQL Server local em Docker:
+
+```bash
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=$MSSQL_SA_PASSWORD" \
+    -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
+```
+
+O driver não vem com o Bricks — adiciona-o à app (versão `.jre11` para Java 17+):
+
+```xml
+<!-- Maven -->
+<dependency>
+    <groupId>com.microsoft.sqlserver</groupId>
+    <artifactId>mssql-jdbc</artifactId>
+    <version>13.6.0.jre11</version>
+    <scope>runtime</scope>
+</dependency>
+```
 
 ```kotlin
+// Gradle
 runtimeOnly("com.microsoft.sqlserver:mssql-jdbc:13.6.0.jre11")
 ```
 
-Notas SQL Server: paginar sempre com `orderBy` (`SELECT DISTINCT` paginado exige-o); upsert precisa de `.conflictOn("coluna_unique")`; usar `ColumnType.STRING`/`TEXT` (dão `NVARCHAR`) em vez de `TEXT`.
+Notas SQL Server:
+- paginar com `orderBy`: sem ele a ordem é indefinida (`ORDER BY (SELECT NULL)`), e `SELECT DISTINCT` paginado lança erro;
+- upsert gera `MERGE` e precisa de `.conflictOn("coluna_unique")` (aceita várias colunas);
+- usar `ColumnType.STRING`/`TEXT` (dão `NVARCHAR`) em vez de escrever `TEXT` à mão;
+- `limit`/`offset` em `UPDATE`/`DELETE` lançam erro (não suportado em todos os dialetos).
 
 ### `database/schema/DatabaseSchema.java`
 
@@ -324,6 +353,68 @@ public class App extends BricksApplication {
 
 ---
 
+## Base de dados
+
+### Query builder
+
+O mesmo código funciona em SQLite, MySQL, PostgreSQL e SQL Server — o dialeto trata das diferenças (aspas, paginação, upsert, tipos de coluna).
+
+```java
+// SELECT para objetos
+List<Aluno> alunos = DB.query()
+    .select("id", "nome", "turma")
+    .from("alunos")
+    .where("ativo", "=", 1)
+    .when(filtroTurma != null, q -> q.where("turma", "=", filtroTurma))
+    .orderBy("nome", "ASC")
+    .limit(20)
+    .execute(Aluno.class);
+
+// INSERT (devolve o id gerado)
+int id = DB.query()
+    .insertInto("alunos")
+    .values(Map.of("nome", "Fabio", "turma", 1))
+    .execute();
+
+// Upsert — conflictOn é obrigatório em SQL Server e PostgreSQL (MySQL ignora-o)
+DB.query()
+    .insertInto("alunos")
+    .values(Map.of("email", "a@b.pt", "nome", "Ana"))
+    .onDuplicateUpdate("nome")
+    .conflictOn("email")
+    .execute();
+```
+
+### SQL raw
+
+Para o que o builder não cobre (`GROUP BY`, `HAVING`, subqueries, `OR`, `JOIN`s complexos...), `raw()` aceita SQL escrito à mão. Os valores vão sempre por `?` (nunca concatenar strings — evita SQL injection). O SQL **não** é traduzido entre dialetos.
+
+```java
+// Com linhas — mapear para objetos
+List<TurmaTotal> totais = DB.query()
+    .raw("SELECT turma, COUNT(*) AS total FROM alunos WHERE nome LIKE ? GROUP BY turma HAVING COUNT(*) > ?",
+         "J%", 2)
+    .execute(TurmaTotal.class);
+
+// Com linhas — Map por coluna
+QueryResult r = DB.query().raw("SELECT COUNT(*) AS total FROM alunos").executeRaw();
+int total = ((Number) r.first().get("total")).intValue();
+
+// Sem linhas — devolve linhas afetadas (ou id gerado num INSERT)
+int afetados = DB.query()
+    .raw("UPDATE alunos SET turma = turma + 1 WHERE turma < ?", 3)
+    .execute();
+```
+
+| Método | Uso |
+| --- | --- |
+| `execute(Classe.class)` | SELECT → `List<Classe>` |
+| `executeRaw()` | SELECT → `QueryResult` (linhas como `Map`) |
+| `execute()` | INSERT/UPDATE/DELETE → id gerado ou linhas afetadas |
+| `executeResult()` | INSERT/UPDATE/DELETE → `QueryResult` com detalhes |
+
+---
+
 ## Estrutura interna da lib
 
 ```
@@ -332,9 +423,14 @@ fabiorodrigues.bricks
 │   ├── BricksApplication   — classe base da aplicação
 │   ├── Component           — interface dos componentes
 │   ├── State<T>            — estado reativo
+│   ├── ValidatedState<T>   — estado com regras de validação
+│   ├── ValidationRule<T>   — regra de validação personalizada
 │   └── DerivedState<T>     — estado calculado a partir de outros estados
 ├── components/             — componentes de UI
-├── data/                   — acesso a base de dados (DB, Query, configs)
+├── data/                   — acesso a base de dados
+│   ├── DB, Query           — ligação e query builder (+ SQL raw)
+│   ├── config/             — SQLite, MySQL, PostgreSQL, SQL Server
+│   └── dialect/            — sintaxe de cada base de dados (ColumnType, SqlDialect)
 └── style/
     ├── Modifier            — propriedades visuais reutilizáveis
     ├── BricksTheme         — sistema de temas Material 3
@@ -367,6 +463,68 @@ private final DerivedState<List<String>> filtrados = derived(
     lista, filtro
 );
 ```
+
+### ValidatedState — validação declarativa
+
+Inspirado no Livewire (Laravel): as regras ficam junto do estado (no ViewModel ou na app), não espalhadas pela UI. `ValidatedState<T>` estende `State<T>`, por isso funciona em qualquer sítio que aceite um `State`.
+
+```java
+public class RegistoViewModel extends BricksViewModel {
+
+    public final ValidatedState<String> nome = validatedState("")
+        .required("Campo obrigatório")
+        .minLength(3, "Mínimo 3 caracteres");
+
+    public final ValidatedState<String> email = validatedState("")
+        .required("Campo obrigatório")
+        .email("Email inválido");
+
+    public final ValidatedState<Integer> idade = validatedState(null)
+        .required("Campo obrigatório")
+        .min(18, "Tem de ser maior de idade");
+
+    public void guardar() {
+        // só é chamado se todos os campos forem válidos
+    }
+}
+```
+
+`validatedState()` existe em `BricksViewModel`, `BricksScene` e `BricksApplication`.
+
+| Regra | Aplica-se a | Falha quando |
+| --- | --- | --- |
+| `required(msg)` | qualquer tipo | `null`, ou String vazia/em branco |
+| `minLength(n, msg)` / `maxLength(n, msg)` | String | comprimento fora do limite |
+| `email(msg)` | String | formato de email inválido |
+| `matches(regex, msg)` | String | não corresponde ao regex |
+| `min(v, msg)` / `max(v, msg)` | Number | valor fora do limite |
+| `rule(v -> ...)` | qualquer tipo | a lambda devolve uma mensagem (≠ `null`) |
+
+`email` e `matches` ignoram valores vazios — combinar com `required` se o campo for obrigatório. A validação para na primeira regra que falha.
+
+| Método | Descrição |
+| --- | --- |
+| `validate()` | Valida, torna o erro visível e faz re-render. Devolve `true` se válido |
+| `isValid()` | Valida em silêncio (não mostra erros) |
+| `getError()` | Mensagem de erro visível, ou `null` |
+| `clearError()` | Esconde o erro (ex: depois de limpar o form) |
+
+### Form
+
+Agrupa campos, valida tudo ao submeter e só chama `onSubmit` se todos forem válidos. Um `TextField` ligado a um `ValidatedState` com `bindTo` mostra o erro por baixo do campo (com borda vermelha) — os erros só aparecem depois da primeira tentativa de submeter.
+
+```java
+new Form()
+    .field(new TextField().label("Nome:").bindTo(vm.nome))
+    .field(new TextField().label("Email:").bindTo(vm.email))
+    .field(new TextField().label("Idade:").number().bindTo(vm.idade))
+    .field(new Dropdown<>(...).bindTo(vm.categoria), vm.categoria) // outros campos: passar o state
+    .submitLabel("Guardar")
+    .gap(12)
+    .onSubmit(vm::guardar)
+```
+
+`form.submit()` faz o mesmo que clicar no botão (útil para ligar ao Enter). O erro mantém-se até ao próximo submit; depois de guardar, chamar `clearError()` nos states para limpar.
 
 ---
 
@@ -408,6 +566,7 @@ new Column()
 | `Checkbox`  | Caixa de seleção                      |
 | `Dropdown`  | Lista de seleção                      |
 | `Slider`    | Controlo deslizante                   |
+| `Form`      | Agrupa campos com validação (ver [Form](#form)) |
 
 ```java
 new TextField()

@@ -67,6 +67,30 @@ public abstract class BricksViewModel {
     }
 
     /**
+     * Cria um {@link ValidatedState} ligado ao re-render da app.
+     * Usar para campos com validacao declarativa no ViewModel.
+     *
+     * <pre>{@code
+     * public final ValidatedState<String> email = validatedState("")
+     *     .required("Campo obrigatorio")
+     *     .email("Email invalido");
+     * }</pre>
+     *
+     * @param initial o valor inicial
+     * @param <T>     o tipo do valor
+     * @return o ValidatedState criado
+     */
+    protected <T> ValidatedState<T> validatedState(T initial) {
+        ValidatedState<T> vs = new ValidatedState<>(initial);
+        if (app != null) {
+            vs.addListener(() -> Platform.runLater(app::rerender));
+        } else {
+            pendingStates.add(vs);
+        }
+        return vs;
+    }
+
+    /**
      * Cria um ScrollState para preservar a posicao do scroll de um LazyColumn
      * entre re-renders. Equivalente ao rememberScrollState() do Jetpack Compose.
      *

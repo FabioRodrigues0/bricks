@@ -47,6 +47,21 @@ public abstract class BricksScene {
     }
 
     /**
+     * Cria um {@link ValidatedState} LOCAL a esta scene, ligado ao re-render da app
+     * (para os erros de validacao aparecerem quando o form e submetido).
+     * Reset quando a scene e recriada.
+     *
+     * @param initial o valor inicial
+     * @param <T>     o tipo do valor
+     * @return o ValidatedState criado
+     */
+    protected <T> ValidatedState<T> validatedState(T initial) {
+        ValidatedState<T> vs = new ValidatedState<>(initial);
+        vs.addListener(() -> javafx.application.Platform.runLater(app::rerender));
+        return vs;
+    }
+
+    /**
      * Cria um StateList LOCAL a esta scene, ligado ao re-render da app.
      * Reset quando a scene e recriada.
      *

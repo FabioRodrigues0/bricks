@@ -289,6 +289,24 @@ public abstract class BricksApplication extends Application {
     }
 
     /**
+     * Cria um {@link ValidatedState} reativo ligado a esta aplicacao.
+     *
+     * <pre>{@code
+     * private final ValidatedState<String> nome = validatedState("")
+     *     .required("Campo obrigatorio");
+     * }</pre>
+     *
+     * @param initial o valor inicial
+     * @param <T> o tipo do valor
+     * @return o ValidatedState criado
+     */
+    protected <T> ValidatedState<T> validatedState(T initial) {
+        ValidatedState<T> vs = new ValidatedState<>(initial);
+        states.add(vs);
+        return vs;
+    }
+
+    /**
      * Cria um {@link StateList} reativo ligado a esta aplicacao.
      * Quando a lista e mutada, a aplicacao faz re-render automaticamente.
      *

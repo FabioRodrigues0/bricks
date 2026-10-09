@@ -11,7 +11,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 /**
- * Builder de queries SQL. Suporta SELECT, INSERT, UPDATE, DELETE e CREATE TABLE.
+ * Builder de queries SQL. Suporta SELECT, INSERT, UPDATE, DELETE, CREATE TABLE e SQL raw.
  * Criado via {@link DB#query()}.
  *
  * <p>SELECT com filtros condicionais:</p>
@@ -35,6 +35,16 @@ import java.util.stream.Collectors;
  *     .conflictOn("id")
  *     .execute();
  * }</pre>
+ *
+ * <p>SQL raw (GROUP BY, HAVING, subqueries, ...) — valores sempre por {@code ?}:</p>
+ * <pre>{@code
+ * List<TurmaTotal> totais = DB.query()
+ *     .raw("SELECT turma, COUNT(*) AS total FROM alunos WHERE nome LIKE ? GROUP BY turma", "J%")
+ *     .execute(TurmaTotal.class);
+ * }</pre>
+ *
+ * <p>O SQL gerado pelo builder e adaptado ao dialeto configurado (SQLite, MySQL, PostgreSQL
+ * ou SQL Server); o SQL de {@link #raw(String, Object...)} e executado tal como esta.</p>
  *
  * <p>Nota: o metodo de filtro condicional e {@code .when()} — {@code .if()} e uma palavra
  * reservada em Java e nao pode ser usado como nome de metodo.</p>

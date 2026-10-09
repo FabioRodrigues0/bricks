@@ -50,6 +50,22 @@ import java.util.Set;
  *     );
  * }
  * }</pre>
+ *
+ * <p>Com SQL Server (Azure SQL ou Docker) — requer o driver {@code mssql-jdbc} na app:</p>
+ * <pre>{@code
+ * DB.configure(SQLServerConfig.azure("nome-do-servidor", "escola")
+ *     .credentialsFromEnv("DB_USER", "DB_PASSWORD"));
+ *
+ * DB.configure(SQLServerConfig.localDocker("escola")
+ *     .password(System.getenv("MSSQL_SA_PASSWORD")));
+ * }</pre>
+ *
+ * <p>SQL escrito a mao, para o que o builder nao cobre (ver {@link Query#raw(String, Object...)}):</p>
+ * <pre>{@code
+ * List<TurmaTotal> totais = DB.query()
+ *     .raw("SELECT turma, COUNT(*) AS total FROM alunos GROUP BY turma HAVING COUNT(*) > ?", 2)
+ *     .execute(TurmaTotal.class);
+ * }</pre>
  */
 public final class DB {
 

@@ -2,6 +2,7 @@ package fabiorodrigues.bricks.components;
 
 import fabiorodrigues.bricks.core.Component;
 import fabiorodrigues.bricks.core.State;
+import fabiorodrigues.bricks.core.ValidatedState;
 import fabiorodrigues.bricks.style.Modifier;
 import java.util.function.Consumer;
 import javafx.application.Platform;
@@ -28,6 +29,11 @@ import javafx.scene.layout.VBox;
  * <p>Com label:</p>
  * <pre>{@code
  * new TextField().label("Username:").placeholder("Escreve o teu nome...");
+ * }</pre>
+ *
+ * <p>Com validacao (erro aparece por baixo do campo depois de o {@link Form} submeter):</p>
+ * <pre>{@code
+ * new TextField().label("Email:").bindTo(vm.email); // vm.email e um ValidatedState
  * }</pre>
  *
  * <p>Para ler o valor atual usa {@link #getValue()}:</p>
@@ -58,6 +64,7 @@ public class TextField implements Component {
     private Modifier modifier;
     private Consumer<String> onChange;
     private State<?> boundState;
+    private ValidatedState<?> validatedState;
     private TextInputControl control;
 
     private boolean autoFocus = false;
@@ -263,12 +270,27 @@ public class TextField implements Component {
      * new TextField().number().bindTo(idade);
      * }</pre>
      *
+     * <p>Se o state for um {@link ValidatedState}, o campo mostra automaticamente
+     * a mensagem de erro por baixo depois de {@link ValidatedState#validate()} ser chamado
+     * (ex: ao submeter um {@link Form}).</p>
+     *
      * @param state o state a ligar
      * @return este componente para encadeamento
      */
     public <T> TextField bindTo(State<T> state) {
         this.boundState = state;
+        this.validatedState = state instanceof ValidatedState<?> vs ? vs : null;
         return this;
+    }
+
+    /**
+     * Devolve o {@link ValidatedState} ligado a este campo, se existir.
+     * Usado pelo {@link Form} para registar a validacao automaticamente.
+     *
+     * @return o ValidatedState ligado, ou null
+     */
+    public ValidatedState<?> getValidatedState() {
+        return validatedState;
     }
 
     /**
@@ -387,10 +409,21 @@ public class TextField implements Component {
             modifier.applyTo(control);
         }
 
-        if (label != null) {
-            Node labelNode = new Text(label).styleClass("bricks-label").render();
-            VBox container = new VBox(4, labelNode, control);
+        String error = validatedState != null ? validatedState.getError() : null;
+        if (error != null) {
+            control.getStyleClass().add("bricks-field-error-border");
+        }
+
+        if (label != null || error != null) {
+            VBox container = new VBox(4);
             container.setFillWidth(true);
+            if (label != null) {
+                container.getChildren().add(new Text(label).styleClass("bricks-label").render());
+            }
+            container.getChildren().add(control);
+            if (error != null) {
+                container.getChildren().add(new Text(error).styleClass("bricks-field-error").render());
+            }
             LayoutUtils.applyExpansionToWrapper(control, container);
             return container;
         }

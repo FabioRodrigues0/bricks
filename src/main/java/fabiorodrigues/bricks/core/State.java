@@ -55,7 +55,16 @@ public class State<T> {
      */
     public void set(T newValue) {
         this.value = newValue;
-        for (Runnable listener : listeners) {
+        notifyListeners();
+    }
+
+    /**
+     * Notifica todos os listeners registados sem alterar o valor.
+     * Usado por subclasses (ex: {@link ValidatedState}) para disparar re-render
+     * quando muda estado interno que nao e o valor.
+     */
+    protected void notifyListeners() {
+        for (Runnable listener : List.copyOf(listeners)) {
             listener.run();
         }
     }
